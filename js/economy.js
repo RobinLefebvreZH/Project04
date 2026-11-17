@@ -2,7 +2,10 @@ import { CITIES } from './cities.js';
 import { CELL, BLOCK, hash2, artOf, tradeFactors, buildYear, cityCenter } from './world.js';
 
 export const SEASON = 120;
-const SAVE_KEY = 'swissblocks.game.v7';
+const LEGACY_KEY = 'swissblocks.game.v7';
+const SLOT_KEY = (n) => `swissblocks.slot.${n}`;
+const ACTIVE_KEY = 'swissblocks.activeSlot';
+export const SLOTS = [1, 2, 3];
 const BOARD_KEY = 'swissblocks.board.v7';
 const START = { month: 10, year: 2026 };
 
@@ -71,17 +74,59 @@ export function getBoard() {
   }
 }
 
-export function savedGame() {
+function readSlot(n) {
   try {
-    const s = JSON.parse(localStorage.getItem(SAVE_KEY));
-    return s && s.v === 8 && !s.ended ? { city: s.city || 'zurich', t: s.t } : null;
+    const s = JSON.parse(localStorage.getItem(SLOT_KEY(n)));
+    return s && s.v === 8 ? s : null;
   } catch {
     return null;
   }
 }
 
+function migrateLegacy() {
+  try {
+    const legacy = localStorage.getItem(LEGACY_KEY);
+    if (!legacy) return;
+    if (!localStorage.getItem(SLOT_KEY(1))) localStorage.setItem(SLOT_KEY(1), legacy);
+    localStorage.removeItem(LEGACY_KEY);
+  } catch {
+    return;
+  }
+}
+migrateLegacy();
+
+export function listSlots() {
+  return SLOTS.map((n) => {
+    const s = readSlot(n);
+    return s
+      ? { slot: n, profile: s.profile, city: s.city || 'zurich', t: s.t, month: s.month, year: s.year, worth: s.worth ?? s.cash, count: Object.keys(s.owned).length, savedAt: s.savedAt || 0, ended: s.ended, rivals: s.mode?.rivals }
+      : { slot: n, empty: true };
+  });
+}
+
+export function latestSlot() {
+  return listSlots().filter((s) => !s.empty).sort((a, b) => b.savedAt - a.savedAt)[0] || null;
+}
+
+export function activeSlot() {
+  try {
+    return +localStorage.getItem(ACTIVE_KEY) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+export function deleteSlot(n) {
+  try {
+    localStorage.removeItem(SLOT_KEY(n));
+  } catch {
+    return;
+  }
+}
+
 export function createEconomy(emit) {
   let G = null;
+  let slot = 0;
   let world = null;
   let oldTown = () => false;
   const plugins = [];
@@ -114,22 +159,32 @@ export function createEconomy(emit) {
   }
 
   function save() {
-    if (!G) return;
+    if (!G || !slot) return;
     if (world) G.extra[world.key] = Object.fromEntries([...world.extra.entries()].filter((e) => e[1]));
-    store(SAVE_KEY, G);
+    G.savedAt = Date.now();
+    G.worth = netWorth();
+    store(SLOT_KEY(slot), G);
+    store(ACTIVE_KEY, slot);
   }
 
-  function load() {
-    try {
-      const s = JSON.parse(localStorage.getItem(SAVE_KEY));
-      if (!s || s.v !== 8) return false;
-      G = s;
-      for (const p of plugins) p.init?.(G);
-      G.speed = 0;
-      return true;
-    } catch {
-      return false;
-    }
+  function load(n) {
+    const s = readSlot(n);
+    if (!s) return false;
+    G = s;
+    slot = n;
+    world = null;
+    G.speed = 0;
+    for (const p of plugins) p.init?.(G);
+    store(ACTIVE_KEY, n);
+    return true;
+  }
+
+  function start(n, profile, options, city) {
+    slot = n;
+    world = null;
+    newGame(profile, options);
+    G.city = city;
+    save();
   }
 
   function attachWorld(w) {
@@ -638,6 +693,8 @@ export function createEconomy(emit) {
 
   return {
     get state() { return G; },
+    get slot() { return slot; },
+    start,
     get world() { return world; },
     use(plugin) { plugins.push(plugin); if (G) plugin.init?.(G); },
     news, toast, emit, effectiveRate, financing, rivalOf, label, snapshot, oRent, oRentGross,

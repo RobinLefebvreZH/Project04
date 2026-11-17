@@ -3,7 +3,7 @@ import { loadWorld, cityCenter, CELL } from './world.js';
 import { createScene } from './scene.js';
 import { createControls } from './camera.js';
 import { createOverlay } from './overlay.js';
-import { createEconomy, savedGame } from './economy.js';
+import { createEconomy, activeSlot } from './economy.js';
 import { createHud } from './ui.js';
 import { createGoals } from './goals.js';
 import { createCards } from './cards.js';
@@ -11,11 +11,13 @@ import { createRivals } from './rivals.js';
 import { createFx } from './fx.js';
 import { chf } from './format.js';
 import { renderHome } from './home.js';
+import { createBackdrop } from './backdrop.js';
+import { heroFigure } from './figures.js';
+import { settings, onSettingsChange, QUALITY, MONTH_SECONDS } from './settings.js';
 import { t, cityName, applyStatic } from './i18n.js';
 import { closeModal } from './modal.js';
 import { LANDMARKS } from '../wiki/landmarks.js';
 
-const MONTH_SECONDS = 6;
 const homeEl = document.getElementById('home');
 const gameEl = document.getElementById('game');
 const loadingEl = document.getElementById('loading');
@@ -23,7 +25,8 @@ const loadBar = document.getElementById('loadBar');
 const loadText = document.getElementById('loadText');
 
 let session = null;
-let stopHome = null;
+let home = null;
+let backdrop = null;
 let pendingFocus = null;
 let routeToken = 0;
 
@@ -77,7 +80,6 @@ const rivals = createRivals(economy, host);
 economy.use(goals);
 economy.use(createCards(economy, host));
 economy.use(rivals);
-let needsProfile = !economy.load();
 
 function progress(fraction, text) {
   loadBar.style.width = `${Math.round(fraction * 100)}%`;
@@ -98,6 +100,18 @@ function teardown() {
   session = null;
 }
 
+function closeHome() {
+  backdrop?.dispose();
+  backdrop = null;
+  home?.dispose();
+  home = null;
+}
+
+function enter(city) {
+  if (location.hash.slice(1) === city) route();
+  else location.hash = city;
+}
+
 function showHome() {
   teardown();
   closeModal();
@@ -105,19 +119,40 @@ function showHome() {
   loadingEl.hidden = true;
   homeEl.hidden = false;
   document.title = t('app.title');
-  stopHome?.();
-  stopHome = renderHome(homeEl, {
-    saved: economy.state && !economy.state.ended ? savedGame() : null,
-    onPlay: (key) => { location.hash = key; },
-    onContinue: () => { location.hash = savedGame()?.city || 'zurich'; },
+  if (home) return;
+  home = renderHome(homeEl, {
+    onNew(slot, profile, options, city) {
+      economy.start(slot, profile, options, city);
+      enter(city);
+    },
+    onLoad(slot) {
+      if (economy.load(slot)) enter(economy.state.city || 'zurich');
+    },
   });
+  startBackdrop();
 }
+
+function startBackdrop() {
+  backdrop?.dispose();
+  backdrop = null;
+  const el = home.backdrop;
+  el.classList.remove('static');
+  el.innerHTML = '';
+  if (settings().backdrop) backdrop = createBackdrop(el, settings().quality);
+  else {
+    el.classList.add('static');
+    el.innerHTML = heroFigure();
+  }
+}
+
+onSettingsChange((s, key) => {
+  if (home && (key === 'backdrop' || key === 'quality')) startBackdrop();
+});
 
 async function startGame(key) {
   const token = ++routeToken;
   teardown();
-  stopHome?.();
-  stopHome = null;
+  closeHome();
   closeModal();
   homeEl.hidden = true;
   applyStatic(loadingEl);
@@ -134,12 +169,11 @@ async function startGame(key) {
   if (token !== routeToken) return;
   progress(0.45, t('load.build'));
 
-  if (!economy.state) economy.newGame('banker');
   const extended = economy.attachWorld(world);
   const canvas = document.createElement('canvas');
   canvas.className = 'view';
   document.getElementById('stage').appendChild(canvas);
-  const scene = await createScene(canvas, world, (f) => progress(0.45 + f * 0.45));
+  const scene = await createScene(canvas, world, (f) => progress(0.45 + f * 0.45), QUALITY[settings().quality]);
   if (token !== routeToken) {
     scene.dispose();
     canvas.remove();
@@ -178,6 +212,7 @@ async function startGame(key) {
   hud.syncState();
   overlay.drawMinimapBase(scene.mesher.coverColor);
   hud.start();
+  hud.applySettings(settings());
 
   session = { key, world, scene, controls, overlay, hud, fx, canvas, frame: 0 };
   document.title = `${cityName(key)} · ${t('app.title')}`;
@@ -185,10 +220,7 @@ async function startGame(key) {
   loadingEl.hidden = true;
   gameEl.hidden = false;
 
-  if (needsProfile) {
-    needsProfile = false;
-    hud.showProfiles(true);
-  } else if (economy.state.ended) {
+  if (economy.state.ended) {
     hud.showProfiles();
   } else if (pendingFocus != null) {
     const b = pendingFocus;
@@ -210,7 +242,7 @@ function run(s) {
     const g = economy.state;
     if (g.speed) {
       monthClock += dt * g.speed;
-      if (monthClock >= MONTH_SECONDS) {
+      if (monthClock >= MONTH_SECONDS[settings().pace]) {
         monthClock = 0;
         economy.month();
       }
@@ -232,6 +264,10 @@ function run(s) {
 
 function route() {
   const key = decodeURIComponent(location.hash.slice(1));
+  if (CITIES[key] && !economy.state && !economy.load(activeSlot())) {
+    location.hash = '';
+    return;
+  }
   if (CITIES[key]) {
     if (session?.key !== key) startGame(key);
   } else showHome();

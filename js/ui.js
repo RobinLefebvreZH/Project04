@@ -600,6 +600,11 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
     onFlyChange,
     celebrate,
     resume(speed) { setSpeed(speed); },
+    applySettings(s) {
+      overlay.setVisible(s.labels);
+      $('tLabels').classList.toggle('on', s.labels);
+      $('mini').hidden = !s.minimap;
+    },
     refresh(b) {
       renderTab();
       if (selected >= 0 && (b === undefined || b < 0 || b === selected)) renderInfo();

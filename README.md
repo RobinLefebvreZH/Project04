@@ -14,7 +14,9 @@ Then open http://localhost:8000.
 
 ## Play
 
-1. Pick a city on the home page and choose a profile: Banker, Entrepreneur or Heir.
+The home menu has New game, Load game (three save slots), Settings (language, graphics quality, game pace, labels, minimap, animated backdrop), How to play and the leaderboard.
+
+1. Start a new game: choose a profile (Banker, Entrepreneur or Heir), a starting city, whether rivals are on, and a save slot.
 2. Click buildings to see value, rent and yield. Buy with up to 80% mortgage, subject to the Swiss affordability rule.
 3. Run time, handle defects and market events, renovate or add floors.
 4. After 120 months you are ranked on assets, net operating income and execution.
@@ -34,7 +36,9 @@ Landmarks, universities and main stations open a short card with photos and a li
 index.html          markup only
 css/style.css       all styles
 js/main.js          routing between home and game, main loop
-js/home.js          home page
+js/home.js          home menu: new game, load game, settings, help, credits
+js/backdrop.js      animated city behind the home menu
+js/settings.js      persisted player settings
 js/ui.js            in-game interface
 js/modal.js         modal dialog
 js/i18n.js          translations and language switching

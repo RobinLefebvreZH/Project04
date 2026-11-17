@@ -123,9 +123,9 @@ void main() {
 
 export const STATE = { none: 0, defect: 128, owned: 255 };
 
-export async function createScene(canvas, world, onProgress = () => {}) {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+export async function createScene(canvas, world, onProgress = () => {}, quality = { pixelRatio: 1.75, antialias: true, radius: [420, 1100] }) {
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: quality.antialias, alpha: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, quality.pixelRatio));
   renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
   renderer.setClearColor(0x000000, 0);
 
@@ -166,7 +166,8 @@ export async function createScene(canvas, world, onProgress = () => {}) {
   scene.add(ground);
 
   let fullCount = 0;
-  let radius = 750;
+  const [minRadius, maxRadius] = quality.radius;
+  let radius = Math.min(750, maxRadius);
 
   function updateLOD() {
     const cp = camera.position;
@@ -241,8 +242,8 @@ export async function createScene(canvas, world, onProgress = () => {}) {
   }
 
   function adaptDetail(fps) {
-    if (fps < 28 && radius > 420) radius -= 4;
-    else if (fps > 50 && radius < 1100) radius += 2;
+    if (fps < 28 && radius > minRadius) radius -= 4;
+    else if (fps > 50 && radius < maxRadius) radius += 2;
   }
 
   function resize() {

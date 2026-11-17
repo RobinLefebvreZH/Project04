@@ -41,10 +41,21 @@ export function hash2(x, y) {
   return ((h ^ (h >>> 16)) >>> 0) / 4294967295;
 }
 
+let loading = Promise.resolve();
+
+function loadCityData(key) {
+  const next = loading.then(async () => {
+    await loadScript(`data/${key}.js`);
+    const raw = window.SB_CITY;
+    delete window.SB_CITY;
+    return raw;
+  });
+  loading = next.catch(() => null);
+  return next;
+}
+
 export async function loadWorld(key, landmarks, onProgress = () => {}) {
-  await loadScript(`data/${key}.js`);
-  const raw = window.SB_CITY;
-  delete window.SB_CITY;
+  const raw = await loadCityData(key);
   onProgress(0.15);
   const grid = await gunzip(raw.grid);
   const meta = JSON.parse(new TextDecoder().decode(await gunzip(raw.meta)));
