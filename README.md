@@ -19,6 +19,13 @@ Then open http://localhost:8000.
 3. Run time, handle defects and market events, renovate or add floors.
 4. After 120 months you are ranked on assets, net operating income and execution.
 
+Along the way:
+
+- Floating rent numbers, pulses and rising floors show what your buildings are doing.
+- Decision cards (short stay offers, rent disputes, solar subsidies, fixed rate offers and more) ask you to choose, and some outcomes arrive months later.
+- Missions, collections and titles give short and medium term goals with cash or mortgage rate rewards.
+- Optional at the start of a season: three rival investors, live auctions with a bidding timer, and market rumours that may or may not come true.
+
 Landmarks, universities and main stations open a short card with photos and a link to Wikipedia. The language can be switched at any time between English, German, French and Italian.
 
 ## Structure
@@ -39,6 +46,10 @@ js/scene.js         renderer, shader, level of detail
 js/camera.js        orbit and flight controls, picking
 js/overlay.js       labels and minimap
 js/economy.js       game rules, defects, events, scoring
+js/goals.js         missions, collections, titles
+js/cards.js         decision cards and delayed outcomes
+js/rivals.js        rival investors, auctions, rumours
+js/fx.js            floating numbers and building pulses
 js/figures.js       SVG figures
 data/*.js           compressed city grids
 wiki/landmarks.js   landmark texts, links and photo credits

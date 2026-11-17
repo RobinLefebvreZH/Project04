@@ -5,6 +5,11 @@ import { createControls } from './camera.js';
 import { createOverlay } from './overlay.js';
 import { createEconomy, savedGame } from './economy.js';
 import { createHud } from './ui.js';
+import { createGoals } from './goals.js';
+import { createCards } from './cards.js';
+import { createRivals } from './rivals.js';
+import { createFx } from './fx.js';
+import { chf } from './format.js';
 import { renderHome } from './home.js';
 import { t, cityName, applyStatic } from './i18n.js';
 import { closeModal } from './modal.js';
@@ -22,17 +27,56 @@ let stopHome = null;
 let pendingFocus = null;
 let routeToken = 0;
 
+const INCOME_FLOATERS = 24;
+
+function animateExtension(s, b) {
+  const target = s.world.extra[b];
+  s.world.extra[b] = target - 1;
+  s.scene.rebuildBuilding(b);
+  s.fx.pulse(b);
+  setTimeout(() => {
+    if (session !== s) return;
+    s.world.extra[b] = target;
+    s.scene.rebuildBuilding(b);
+    s.fx.float(b, t('fx.extended'), 'event');
+  }, 500);
+}
+
+function showIncome(s, list) {
+  list.sort((a, b) => b[1] - a[1]).slice(0, INCOME_FLOATERS).forEach(([b, amount], i) => {
+    setTimeout(() => session === s && s.fx.float(b, `+${chf(amount)}`, 'income'), i * 40);
+  });
+}
+
 const economy = createEconomy((type, payload) => {
-  const hud = session?.hud;
-  if (!hud) return;
+  const s = session;
+  if (!s) return;
+  const { hud } = s;
   if (type === 'toast') hud.toast(payload);
   else if (type === 'news') hud.renderNews();
   else if (type === 'state') hud.updateState(payload);
   else if (type === 'heat') hud.updateHeat();
-  else if (type === 'rebuild') session.scene.rebuildBuilding(payload);
+  else if (type === 'rebuild') animateExtension(s, payload);
   else if (type === 'season') hud.showSeason(payload);
   else if (type === 'change') hud.refresh(payload);
+  else if (type === 'income') showIncome(s, payload);
+  else if (type === 'goal') hud.celebrate(payload);
+  else if (type === 'pulse') {
+    s.fx.pulse(payload.b);
+    s.fx.float(payload.b, t(payload.k), 'event');
+  }
 });
+
+const host = {
+  pause: () => session?.hud.setSpeed(0),
+  resume: (speed) => session?.hud.resume(speed),
+  focus: (b) => session?.hud.focus(b),
+};
+const goals = createGoals(economy);
+const rivals = createRivals(economy, host);
+economy.use(goals);
+economy.use(createCards(economy, host));
+economy.use(rivals);
 let needsProfile = !economy.load();
 
 function progress(fraction, text) {
@@ -46,6 +90,7 @@ function teardown() {
   economy.setSpeed(0);
   economy.save();
   session.hud.dispose();
+  session.fx.dispose();
   session.overlay.dispose();
   session.controls.dispose();
   session.scene.dispose();
@@ -113,8 +158,9 @@ async function startGame(key) {
     minimap: document.getElementById('minimap'),
     economy,
   });
+  const fx = createFx({ world, scene, layer: document.getElementById('fx') });
   const hud = createHud({
-    world, economy, scene, controls, overlay,
+    world, economy, scene, controls, overlay, goals, rivals,
     onHome: () => { location.hash = ''; },
     onCity: (c, b) => {
       pendingFocus = b ?? null;
@@ -133,7 +179,7 @@ async function startGame(key) {
   overlay.drawMinimapBase(scene.mesher.coverColor);
   hud.start();
 
-  session = { key, world, scene, controls, overlay, hud, canvas, frame: 0 };
+  session = { key, world, scene, controls, overlay, hud, fx, canvas, frame: 0 };
   document.title = `${cityName(key)} · ${t('app.title')}`;
   progress(1);
   loadingEl.hidden = true;
@@ -173,6 +219,7 @@ function run(s) {
     const [zenith, horizon] = s.scene.setDaylight(daylight);
     gameEl.style.background = `linear-gradient(${zenith} 0%, ${horizon} 55%)`;
     document.getElementById('needle').style.transform = `rotate(${s.controls.heading}rad)`;
+    s.fx.update(dt);
     s.scene.render(now / 1000);
     labelClock += dt;
     if (labelClock > 0.05) { labelClock = 0; s.overlay.drawLabels(); }

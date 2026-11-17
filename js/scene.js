@@ -104,6 +104,9 @@ void main() {
     float stripe = step(0.5, fract((vW.x + vW.y + vW.z) * 0.2));
     c = mix(c, mix(vec3(1.0, 0.6, 0.1), vec3(0.15), stripe), 0.55);
   }
+  if (vS.r > 0.2 && vS.r < 0.35) c = mix(c, vec3(0.36, 0.33, 0.78), 0.45);
+  c = mix(c, vec3(1.0, 0.95, 0.7), vS.b * 0.75);
+  emis += vec3(1.0, 0.85, 0.4) * vS.b * 0.35;
   if (vSel > 0.5) {
     c = mix(c, vec3(1.0, 1.0, 0.55), 0.35 + 0.2 * sin(time * 7.0));
     emis += vec3(0.12, 0.12, 0.04);
@@ -257,6 +260,7 @@ export async function createScene(canvas, world, onProgress = () => {}) {
     rebuildBuilding,
     setBuildingState,
     commitState() { stateTex.needsUpdate = true; },
+    setPulse(b, v) { if (b >= 0 && b < STATE_W * STATE_H) stateData[b * 4 + 2] = v; },
     select(b) { uniforms.selId.value = b >= 0 ? b + 1 : -1; },
     setHeat(on) { uniforms.heat.value = on ? 1 : 0; },
     setDaylight,

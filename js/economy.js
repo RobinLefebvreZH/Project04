@@ -74,7 +74,7 @@ export function getBoard() {
 export function savedGame() {
   try {
     const s = JSON.parse(localStorage.getItem(SAVE_KEY));
-    return s && s.v === 7 && !s.ended ? { city: s.city || 'zurich', t: s.t } : null;
+    return s && s.v === 8 && !s.ended ? { city: s.city || 'zurich', t: s.t } : null;
   } catch {
     return null;
   }
@@ -84,6 +84,7 @@ export function createEconomy(emit) {
   let G = null;
   let world = null;
   let oldTown = () => false;
+  const plugins = [];
 
   const indexKey = (city, q) => `${city}:${q}`;
   const priceIndex = (city, q) => G.idx[indexKey(city, q)] ?? G.allIdx;
@@ -97,16 +98,17 @@ export function createEconomy(emit) {
   }
   const toast = (k, p = {}, tone = '') => emit('toast', { k, p, tone });
 
-  function newGame(profile) {
+  function newGame(profile, options = {}) {
     const P = PROFILES[profile] || PROFILES.banker;
     G = {
-      v: 7, profile, month: START.month, year: START.year, t: 0, cash: P.cash, rate: 1.65, speed: 0,
+      v: 8, mode: { rivals: options.rivals !== false }, rateBonus: 0, fixed: null, rivalOwned: {}, profile, month: START.month, year: START.year, t: 0, cash: P.cash, rate: 1.65, speed: 0,
       owned: {}, news: [], idx: {}, ridx: {}, allIdx: 1, allR: 1, negative: 0, hist: [], extra: {},
       cpi: 1, costIdx: 1, vac: 0.015, vacT: 0, incHist: [], lastInc: 0, lastFlow: 0, defects: [], did: 0,
       set: { maint: 'normal', ins: true, auto: 25000 },
-      st: { noi: [], startNW: P.cash, peak: P.cash, maxDD: 0, ltvSum: 0, ltvN: 0, negM: 0, fixed: 0, fixDelay: 0, permOk: 0, permFail: 0, defects: 0 },
+      st: { noi: [], startNW: P.cash, peak: P.cash, maxDD: 0, ltvSum: 0, ltvN: 0, negM: 0, fixed: 0, fixDelay: 0, permOk: 0, permFail: 0, defects: 0, renos: 0, extensions: 0, clean: 0 },
       ended: false,
     };
+    for (const p of plugins) p.init?.(G);
     news('news.start', { profile, cash: money(P.cash) });
     save();
   }
@@ -120,8 +122,9 @@ export function createEconomy(emit) {
   function load() {
     try {
       const s = JSON.parse(localStorage.getItem(SAVE_KEY));
-      if (!s || s.v !== 7) return false;
+      if (!s || s.v !== 8) return false;
       G = s;
+      for (const p of plugins) p.init?.(G);
       G.speed = 0;
       return true;
     } catch {
@@ -196,7 +199,8 @@ export function createEconomy(emit) {
     const o = owned(b);
     return area(b) * rentM2(b) * factors(b)[1] * (0.8 + 0.2 * (o ? o.cond : 1));
   }
-  const buyable = (b) => !!tradeFactors(world, b) && !world.name[b] && !world.landmark.has(b) && area(b) >= 40;
+  const rivalOf = (b) => G.rivalOwned[ownKey(b)];
+  const buyable = (b) => !!tradeFactors(world, b) && !world.name[b] && !world.landmark.has(b) && area(b) >= 40 && rivalOf(b) === undefined;
   const askPrice = (b) => value(b) * (1.04 + hash2(b, G.year * 12 + G.month) * 0.06);
 
   const oValue = (o) => o.area * o.pm2 * priceIndex(o.city, o.q) * o.vf * (0.85 + 0.15 * o.cond);
@@ -206,9 +210,15 @@ export function createEconomy(emit) {
     for (const d of G.defects) if (d.k === k) p += d.pen;
     return Math.min(0.8, p);
   }
-  const oRent = (o, k) => oRentGross(o) * (o.proj ? o.proj.rentF : 1) * (1 - G.vac) * (1 - penalty(k));
-  const oOpex = (o) => (oValue(o) * (MAINTENANCE[G.set.maint].rate + 0.0005 + (G.set.ins ? 0.0004 : 0)) / 12) * G.costIdx;
-  const oFlow = (o, k) => oRent(o, k) - (o.debt * G.rate) / 100 / 12 - oOpex(o);
+  const boost = (o) => (o.boost && G.t < o.boost.until ? o.boost.f : 1) * (o.green ? 1.03 : 1);
+  const oRent = (o, k) => oRentGross(o) * boost(o) * (o.proj ? o.proj.rentF : 1) * (1 - G.vac) * (1 - penalty(k));
+  const oOpex = (o) => (oValue(o) * (MAINTENANCE[G.set.maint].rate + 0.0005 + (G.set.ins ? 0.0004 : 0)) / 12) * G.costIdx * (o.green ? 0.9 : 1);
+  function effectiveRate() {
+    const base = G.fixed && G.t < G.fixed.until ? G.fixed.rate : G.rate;
+    return Math.max(0.3, base - G.rateBonus);
+  }
+  const oInterest = (o) => (o.debt * effectiveRate()) / 100 / 12;
+  const oFlow = (o, k) => oRent(o, k) - oInterest(o) - oOpex(o);
 
   const sum = (fn) => Object.entries(G.owned).reduce((a, [k, o]) => a + fn(o, k), 0);
   const debt = () => sum((o) => o.debt);
@@ -280,19 +290,30 @@ export function createEconomy(emit) {
     return {
       city: world.key, b, label: label(b), q: quarterId(b), qn: q.name, area: area(b), floors: floors(b),
       foot: footprint(b), age: age(b), pm2: q.price, rent: q.rent, vf: f[0], rf: f[1],
+      addr: world.addresses[b] || '', old: oldTown(b),
     };
   }
 
-  function buy(b, ltv) {
-    const price = askPrice(b), fees = price * 0.005, limit = maxLoan(price, rent(b) * 12);
+  function financing(b, price) {
+    const limit = maxLoan(price, rent(b) * 12);
+    return { limit, need: price - limit + price * 0.005 };
+  }
+
+  function buy(b, ltv, deal = {}) {
+    const price = deal.price ?? askPrice(b), fees = price * 0.005, limit = maxLoan(price, rent(b) * 12);
     const loan = Math.min(price * ltv, limit), need = price - loan + fees;
-    if (G.cash < need) return toast('toast.noEquity', { need: money(need), max: money(limit) }, 'neg');
+    if (G.cash < need) {
+      toast('toast.noEquity', { need: money(need), max: money(limit) }, 'neg');
+      return false;
+    }
     G.cash -= need;
-    G.owned[ownKey(b)] = { ...snapshot(b), debt: loan, paid: price, since: G.t, cond: 0.9 + hash2(b, 1) * 0.15, proj: null };
+    G.owned[ownKey(b)] = { ...snapshot(b), debt: loan, paid: price, since: G.t, cond: deal.cond ?? 0.9 + hash2(b, 1) * 0.15, proj: null };
     news('news.bought', { city: { city: world.key }, name: { building: [world.key, b, label(b)] }, price: money(price), loan: money(loan) });
     toast('toast.bought', { name: { building: [world.key, b, label(b)] } }, 'pos');
     emit('state', b);
+    emit('pulse', { b, k: 'fx.acquired' });
     changed(b);
+    return true;
   }
 
   function sell(k) {
@@ -452,6 +473,8 @@ export function createEconomy(emit) {
     if (p.type === 'reno') {
       o.cond = 1.15;
       o.proj = null;
+      G.st.renos++;
+      if (here) emit('pulse', { b: o.b, k: 'fx.renovated' });
       news('news.renoDone', { name });
       toast('toast.renoDone', { name }, 'pos');
     } else if (p.type === 'permit') {
@@ -469,6 +492,7 @@ export function createEconomy(emit) {
       }
     } else if (p.type === 'build') {
       o.proj = null;
+      G.st.extensions++;
       const ex = (G.extra[o.city] = G.extra[o.city] || {});
       ex[o.b] = (ex[o.b] || 0) + 2;
       const fl = o.floors || 3;
@@ -476,9 +500,9 @@ export function createEconomy(emit) {
       o.floors = fl + 1;
       if (here) {
         world.extra[o.b] = ex[o.b];
-        emit('rebuild', o.b);
         o.area = area(o.b);
         o.floors = floors(o.b);
+        emit('rebuild', o.b);
       }
       news('news.extended', { name });
       toast('toast.extended', { name }, 'pos');
@@ -515,8 +539,9 @@ export function createEconomy(emit) {
       const o = G.owned[k];
       rents += oRent(o, k);
       opex += oOpex(o);
-      interest += (o.debt * G.rate) / 100 / 12;
+      interest += oInterest(o);
     }
+    emit('income', Object.values(G.owned).filter((o) => o.city === world.key && !o.proj).map((o) => [o.b, oRent(o, `${o.city}:${o.b}`)]));
     G.lastFlow = rents - opex - interest + G.lastInc - living();
     G.cash += G.lastFlow;
     G.st.noi.push(rents - opex);
@@ -558,6 +583,8 @@ export function createEconomy(emit) {
         G.negative = 0;
       }
     } else G.negative = 0;
+    G.st.clean = G.cash < 0 ? 0 : G.st.clean + 1;
+    for (const p of plugins) p.month?.(G);
 
     const nw = netWorth(), pv = portfolioValue();
     G.st.peak = Math.max(G.st.peak, nw);
@@ -604,6 +631,7 @@ export function createEconomy(emit) {
   }
 
   function changed(b) {
+    for (const p of plugins) p.changed?.(G);
     save();
     emit('change', b);
   }
@@ -611,6 +639,9 @@ export function createEconomy(emit) {
   return {
     get state() { return G; },
     get world() { return world; },
+    use(plugin) { plugins.push(plugin); if (G) plugin.init?.(G); },
+    news, toast, emit, effectiveRate, financing, rivalOf, label, snapshot, oRent, oRentGross,
+    commit: changed,
     newGame, load, save, attachWorld, month, endSeason, scores,
     buy, sell, renovate, extend, refinance, repair, repairAll,
     setSpeed(s) { G.speed = G.ended ? 0 : s; },

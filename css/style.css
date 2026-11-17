@@ -147,16 +147,17 @@ button.large small { opacity: 0.85; font-size: 12px; }
 .spacer { flex: 1; }
 .speed { display: flex; gap: 4px; }
 
-.search { position: absolute; left: 8px; top: 64px; width: 290px; z-index: 5; padding: 6px; }
+.search { position: absolute; left: 8px; top: 64px; width: 320px; z-index: 5; padding: 6px; }
 .search input { width: 100%; border: 1px solid var(--ink); padding: 7px 8px; outline: none; border-radius: 0; background: #fff; }
 .search input:focus { border-color: var(--red); }
 #searchResults button { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); padding: 6px; }
 #searchResults small, .none { color: var(--muted); }
 .none { padding: 6px; }
 
-.sidebar { position: absolute; left: 8px; top: 112px; bottom: 244px; width: 290px; z-index: 4; display: flex; flex-direction: column; }
+.sidebar { position: absolute; left: 8px; top: 112px; bottom: 244px; width: 320px; z-index: 4; display: flex; flex-direction: column; }
 .tabs { display: flex; border-bottom: 1px solid var(--ink); }
-.tabs button { flex: 1; border: 0; padding: 8px 2px; font-size: 11px; font-weight: 700; }
+.tabs button { flex: 1 1 auto; border: 0; padding: 8px 4px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.tabs .count { display: inline-block; min-width: 15px; padding: 1px 3px; background: var(--red); color: #fff; font-size: 9px; }
 .tab-body { flex: 1; overflow: auto; padding: 10px; }
 .tab-body h4, .info h4 { font-size: 12px; margin: 6px 0; }
 
@@ -261,6 +262,52 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 10px 0; }
 .profile .figure { width: 56px; height: 56px; color: var(--ink); }
 .profile:hover .figure { color: #fff; }
 
+.floater {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
+  will-change: transform, opacity;
+  color: #fff;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.9);
+}
+.floater.income { color: #9be3b4; }
+.floater.event { font-size: 15px; background: var(--red); padding: 2px 7px; text-shadow: none; }
+
+.toast.goal { display: flex; flex-direction: column; gap: 2px; border-left-color: var(--gold); animation-duration: 5s; }
+.toast.goal small { color: var(--muted); }
+.toast.goal.big { padding: 14px 20px; border-left-width: 6px; }
+.toast.goal.big b { font-size: 20px; }
+
+.title-card { display: flex; align-items: center; gap: 12px; margin: 6px 0 8px; }
+.title-rank { width: 36px; height: 36px; flex: none; display: flex; align-items: center; justify-content: center; background: var(--ink); color: #fff; font-weight: 700; font-size: 18px; }
+.title-card b { display: block; font-size: 16px; }
+.title-card small { color: var(--muted); }
+.goal { padding: 6px 0 8px; border-bottom: 1px solid var(--line); }
+.goal small { display: block; color: var(--muted); font-size: 11px; line-height: 1.35; }
+.goal .reward { color: var(--green); margin-top: 2px; }
+.goal.complete b { color: var(--green); }
+.goal .meter { margin-bottom: 4px; }
+
+.tag.rival { background: #5b54c7; border-color: #5b54c7; color: #fff; }
+.row.you > span { color: var(--red); font-weight: 700; }
+
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+.choice { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; text-align: left; padding: 16px; line-height: 1.4; }
+.choice b { font-size: 16px; }
+.choice span { color: var(--muted); }
+.choice:hover { background: var(--ink); color: #fff; }
+.choice:hover span { color: #c9c9c6; }
+.check.option { margin-top: 16px; padding: 12px; border: 1px solid var(--line); font-size: 13px; }
+.check.option input { margin-top: 3px; }
+.timer { height: 6px; margin: 4px 0 10px; }
+.timer i { transition: width 0.25s linear; }
+.auction-log { min-height: 92px; font-size: 13px; line-height: 1.6; }
+.auction-log div:first-child { font-weight: 700; }
+
 @media (max-width: 900px) {
   .home { padding: 24px 18px 48px; }
   .home-hero, .home-columns { grid-template-columns: 1fr; }
@@ -271,5 +318,5 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 10px 0; }
   .nav { transform: scale(0.9); transform-origin: right bottom; }
   .topbar { gap: 8px; }
   .stat { min-width: 56px; }
-  .profiles { grid-template-columns: 1fr; }
+  .profiles, .choices { grid-template-columns: 1fr; }
 }

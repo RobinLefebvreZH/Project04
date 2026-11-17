@@ -10,7 +10,7 @@ const $ = (id) => document.getElementById(id);
 const row = (label, value, cls = '') => `<div class="row"><span>${label}</span><span class="num ${cls}">${value}</span></div>`;
 const tone = (v) => (v >= 0 ? 'pos' : 'neg');
 
-export function createHud({ world, economy, scene, controls, overlay, onHome, onCity }) {
+export function createHud({ world, economy, scene, controls, overlay, goals, rivals, onHome, onCity }) {
   const G = () => economy.state;
   let tab = 'portfolio';
   let boardSort = 'exec';
@@ -52,9 +52,10 @@ export function createHud({ world, economy, scene, controls, overlay, onHome, on
     const f = economy.monthlyFlow();
     $('sFlow').textContent = signedChf(f);
     $('sFlow').className = tone(f);
-    $('sRate').textContent = percent(g.rate / 100, 2);
+    $('sRate').textContent = percent(economy.effectiveRate() / 100, 2);
+    $('sTitle').textContent = t(`title.${g.goals.title}`);
     const defects = g.defects.length;
-    document.querySelector('#tabs [data-tab="defects"]').textContent = defects ? `${t('tab.defects')} (${defects})` : t('tab.defects');
+    document.querySelector('#tabs [data-tab="defects"]').innerHTML = defects ? `${t('tab.defects')} <span class="count">${defects}</span>` : t('tab.defects');
     for (const btn of document.querySelectorAll('#tabs button')) btn.classList.toggle('on', btn.dataset.tab === tab);
   }
 
@@ -100,6 +101,29 @@ export function createHud({ world, economy, scene, controls, overlay, onHome, on
     return h;
   }
 
+  const rewardText = (r) => [r.cash ? `+${chf(r.cash)}` : '', r.rate ? t('goal.rateReward', { p: decimal(r.rate, 2) }) : ''].filter(Boolean).join(' · ');
+  const progressValue = (m, v) => (m.money ? chf(v) : integer(v));
+
+  function renderGoals() {
+    const s = goals.status(G());
+    let h = `<h4>${t('goal.titleHead')}</h4>
+      <div class="title-card"><span class="title-rank">${s.title + 1}</span><div><b>${t(`title.${s.title}`)}</b>
+      <small>${s.next ? t('goal.nextTitle', { title: { goal: `title.${s.title + 1}` }, worth: { chf: s.next.worth } }) : t('goal.maxTitle')}</small></div></div>`;
+    if (s.next) h += `<div class="meter"><i style="width:${s.next.progress * 100}%"></i></div>`;
+    h += `<h4>${t('goal.missions')}</h4>`;
+    for (const m of s.missions) {
+      h += `<div class="goal">${row(`<b>${t(`mission.${m.id}`)}</b>`, `${progressValue(m, m.current)} / ${progressValue(m, m.target)}`)}
+        <div class="meter"><i style="width:${(m.current / m.target) * 100}%"></i></div><small class="reward">${rewardText(m.reward)}</small></div>`;
+    }
+    h += `<p class="note">${t('goal.completed', { n: s.done })}</p><h4>${t('goal.collections')}</h4>`;
+    for (const c of s.collections) {
+      h += `<div class="goal ${c.complete ? 'complete' : ''}">${row(`<b>${t(`collection.${c.id}`)}</b>`, `${c.current} / ${c.target}`)}
+        <div class="meter"><i style="width:${(c.current / c.target) * 100}%"></i></div>
+        <small>${esc(t(`collection.${c.id}.desc`))}</small><small class="reward">${c.complete ? t('goal.done') : rewardText(c.reward)}</small></div>`;
+    }
+    return h;
+  }
+
   function renderDefects() {
     const g = G();
     const M = MAINTENANCE[g.set.maint];
@@ -137,6 +161,7 @@ export function createHud({ world, economy, scene, controls, overlay, onHome, on
         <div class="card"><span>${t('score.exec')}</span><b>${s.exec}/100</b></div>
       </div>${scoreParts(s)}
       <button class="wide" data-action="endSeason" ${g.ended ? 'disabled' : ''}>${t('score.endNow')}</button><hr>
+      ${g.mode.rivals ? `<h4>${t('rival.standings')}</h4>${rivals.standings(g).map((r, i) => `<div class="row ${r.you ? 'you' : ''}"><span>${i + 1}. ${esc(r.name)} <small>${t('rival.count', { n: r.count })}</small></span><span class="num">${chf(r.worth)}</span></div>`).join('')}<hr>` : ''}
       <h4>${t('score.board')}</h4>
       <div class="segment">${[['exec', 'score.exec'], ['aum', 'score.aum'], ['rev', 'score.noi']].map(([k, n]) => `<button class="${boardSort === k ? 'on' : ''}" data-action="board" data-value="${k}">${t(n)}</button>`).join('')}</div>`;
     const board = getBoard().sort((a, b) => b[boardSort] - a[boardSort]).slice(0, 10);
@@ -153,7 +178,10 @@ export function createHud({ world, economy, scene, controls, overlay, onHome, on
       const d = CITIES[c], price = d.price * economy.cityIndex(c);
       h += `<button class="item line ${c === world.key ? 'current' : ''}" data-action="city" data-value="${c}">${row(esc(cityName(c)), `${integer(price)} · ${decimal(d.rent, 1)} · ${percent((d.rent * 12) / price)}`)}</button>`;
     }
-    h += `<hr>${row(t('market.rate'), percent(g.rate / 100, 2))}<p class="note">${esc(t('market.quarters', { city: cityName(world.key) }))}</p>`;
+    if (g.mode.rivals && g.rumours.length) {
+      h += `<hr><h4>${t('rumour.head')}</h4>` + g.rumours.map((r) => row(`${esc(r.name)} <small>${esc(cityName(r.city))}</small>`, `${t(r.up ? 'rumour.tipUp' : 'rumour.tipDown')} · ${t('proj.left', { n: r.at - g.t })}`, r.up ? 'pos' : 'neg')).join('');
+    }
+    h += `<hr>${row(t('market.rate'), percent(g.rate / 100, 2))}${row(t('market.yourRate'), percent(economy.effectiveRate() / 100, 2))}<p class="note">${esc(t('market.quarters', { city: cityName(world.key) }))}</p>`;
     const present = new Set(world.quarterOf);
     const ids = Object.keys(world.quarters).filter((q) => present.has(+q));
     const pi = (q) => economy.priceIndex(world.key, q), ri = (q) => economy.rentIndex(world.key, q);
@@ -171,7 +199,7 @@ export function createHud({ world, economy, scene, controls, overlay, onHome, on
     return G().news.slice().reverse().map((n) => `<div class="news"><div class="date">${dateLabel(n.m, n.y)}</div>${esc(t(n.k, n.p))}</div>`).join('');
   }
 
-  const TABS = { portfolio: renderPortfolio, defects: renderDefects, score: renderScore, market: renderMarket, news: renderNews };
+  const TABS = { portfolio: renderPortfolio, goals: renderGoals, defects: renderDefects, score: renderScore, market: renderMarket, news: renderNews };
   function renderTab() {
     $('tabBody').innerHTML = TABS[tab]();
     refreshTop();
@@ -212,9 +240,13 @@ export function createHud({ world, economy, scene, controls, overlay, onHome, on
     const qName = q.name || cityName(world.key);
     const sub = [qName, world.key === 'zurich' && q.district ? t('building.district', { n: q.district }) : cityName(world.key)];
     if ((world.name[b] || landmark) && world.addresses[b]) sub.push(world.addresses[b]);
+    const rival = economy.rivalOf(b);
     const tags = [
       o ? `<span class="tag accent">${t('tag.owned')}</span>` : '',
-      !buyable && !o ? `<span class="tag">${t('tag.notForSale')}</span>` : '',
+      rival !== undefined ? `<span class="tag rival">${esc(t('tag.rival', { rival: rivals.ownerName(rival) }))}</span>` : '',
+      o?.green ? `<span class="tag">${t('tag.green')}</span>` : '',
+      o?.boost && g.t < o.boost.until ? `<span class="tag">${t('tag.shortStay')}</span>` : '',
+      !buyable && !o && rival === undefined ? `<span class="tag">${t('tag.notForSale')}</span>` : '',
       landmark ? '' : `<span class="tag">${esc(artLabel(b))}</span>`,
       world.glass[b] && !landmark ? `<span class="tag">${t('tag.highRise')}</span>` : '',
       economy.oldTown(b) ? `<span class="tag">${t('tag.oldTown')}</span>` : '',
@@ -266,6 +298,8 @@ export function createHud({ world, economy, scene, controls, overlay, onHome, on
         <div class="slider"><span>${t('info.mortgageSlider')}</span><input type="range" data-action="ltv" min="0" max="${maxLtv}" step="5" value="${ltv}"><span class="num" id="ltvValue">${ltv}%</span></div>
         ${row(t('info.equity'), `<span id="equityNeed">${chf(ask * (1 - ltv / 100) + ask * 0.005)}</span>`)}
         <div class="actions"><button class="primary" data-action="buy" ${g.ended ? 'disabled' : ''}>${t('act.buy')}</button></div>`;
+    } else if (rival !== undefined) {
+      h += `<hr><p class="note">${esc(t('info.rivalOwned', { rival: rivals.ownerName(rival) }))}</p>`;
     } else if (!landmark) {
       h += `<hr><p class="note">${t(world.name[b] ? 'info.public' : 'info.notTradable')}</p>`;
     }
@@ -396,10 +430,11 @@ export function createHud({ world, economy, scene, controls, overlay, onHome, on
         <span>${esc(t(`profile.${k}.desc`))}</span>
         <span class="num muted">${t('profile.living', { cost: { chf: p.living } })}</span>
       </button>`).join('');
-    openModal(`<h1>${t('profile.title')}</h1><p class="lead">${esc(t('profile.lead'))}</p><div class="profiles">${cards}</div>`, (box) => {
+    openModal(`<h1>${t('profile.title')}</h1><p class="lead">${esc(t('profile.lead'))}</p><div class="profiles">${cards}</div>
+      <label class="check option"><input type="checkbox" data-rivals checked><span><b>${t('profile.rivals')}</b><br>${esc(t('profile.rivalsHint'))}</span></label>`, (box) => {
       for (const btn of box.querySelectorAll('[data-profile]')) {
         btn.addEventListener('click', () => {
-          resetGame(btn.dataset.profile);
+          resetGame(btn.dataset.profile, { rivals: box.querySelector('[data-rivals]').checked });
           closeModal();
           setSpeed(1);
         });
@@ -407,14 +442,14 @@ export function createHud({ world, economy, scene, controls, overlay, onHome, on
     }, { dismissible: !required && !G().ended });
   }
 
-  function resetGame(profile) {
+  function resetGame(profile, options) {
     for (let b = 0; b < world.count; b++) {
       if (world.extra[b]) {
         world.extra[b] = 0;
         scene.rebuildBuilding(b);
       }
     }
-    economy.newGame(profile);
+    economy.newGame(profile, options);
     economy.attachWorld(world);
     syncState();
     select(-1);
@@ -450,26 +485,19 @@ export function createHud({ world, economy, scene, controls, overlay, onHome, on
     });
   }
 
-  function syncState() {
-    for (let b = 0; b < world.count; b++) scene.setBuildingState(b, 0, economy.heatValue(b));
-    for (const k in G().owned) {
-      const o = G().owned[k];
-      if (o.city === world.key) updateState(o.b, false);
-    }
-    scene.commitState();
+  function stateOf(b) {
+    const o = economy.owned(b);
+    if (o) return o.proj ? 128 : 255;
+    return economy.rivalOf(b) !== undefined ? 72 : 0;
   }
 
   function updateState(b, commit = true) {
-    const o = economy.owned(b);
-    scene.setBuildingState(b, o ? (o.proj ? 128 : 255) : 0, economy.heatValue(b));
+    scene.setBuildingState(b, stateOf(b), economy.heatValue(b));
     if (commit) scene.commitState();
   }
 
-  function updateHeat() {
-    for (let b = 0; b < world.count; b++) {
-      const o = economy.owned(b);
-      scene.setBuildingState(b, o ? (o.proj ? 128 : 255) : 0, economy.heatValue(b));
-    }
+  function syncState() {
+    for (let b = 0; b < world.count; b++) updateState(b, false);
     scene.commitState();
   }
 
@@ -539,6 +567,15 @@ export function createHud({ world, economy, scene, controls, overlay, onHome, on
     if (on) toast({ k: 'tool.flyHelp', p: {} });
   }
 
+  function celebrate({ k, reward, title }) {
+    const box = $('toasts');
+    const el = document.createElement('div');
+    el.className = `toast panel goal ${title ? 'big' : ''}`;
+    el.innerHTML = `<span class="kind">${t(title ? 'goal.newTitle' : 'goal.achieved')}</span><b>${esc(t(k))}</b><small>${rewardText(reward)}</small>`;
+    box.appendChild(el);
+    setTimeout(() => el.remove(), 5200);
+  }
+
   function refreshAll() {
     applyStatic($('game'));
     buildCitySelect();
@@ -559,8 +596,10 @@ export function createHud({ world, economy, scene, controls, overlay, onHome, on
     showSeason,
     syncState,
     updateState,
-    updateHeat,
+    updateHeat: syncState,
     onFlyChange,
+    celebrate,
+    resume(speed) { setSpeed(speed); },
     refresh(b) {
       renderTab();
       if (selected >= 0 && (b === undefined || b < 0 || b === selected)) renderInfo();

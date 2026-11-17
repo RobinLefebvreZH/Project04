@@ -31,12 +31,14 @@
 <section id="game" class="game" hidden>
   <div id="stage"></div>
   <div id="labels" class="labels"></div>
+  <div id="fx" class="labels"></div>
   <div id="crosshair" class="crosshair" hidden></div>
 
   <header id="topbar" class="panel topbar">
     <button id="bHome" class="icon" data-i18n-title="top.home"><svg><use href="#i-home"/></svg></button>
     <div class="brand" data-i18n="app.title"></div>
     <select id="citySelect" data-i18n-aria="top.city"></select>
+    <div class="stat"><span data-i18n="top.title"></span><b id="sTitle"></b></div>
     <div class="stat"><span data-i18n="top.date"></span><b id="sDate"></b></div>
     <div class="stat"><span data-i18n="top.cash"></span><b id="sCash"></b></div>
     <div class="stat"><span data-i18n="top.debt"></span><b id="sDebt"></b></div>
@@ -61,6 +63,7 @@
   <aside id="sidebar" class="panel sidebar">
     <nav id="tabs" class="tabs">
       <button data-tab="portfolio" data-i18n="tab.portfolio"></button>
+      <button data-tab="goals" data-i18n="tab.goals"></button>
       <button data-tab="defects" data-i18n="tab.defects"></button>
       <button data-tab="score" data-i18n="tab.score"></button>
       <button data-tab="market" data-i18n="tab.market"></button>
