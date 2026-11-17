@@ -1,4 +1,4 @@
-# Swiss Blocks — Voxel Real Estate Tycoon
+# Swiss Blocks - Voxel Real Estate Tycoon
 
 A browser game: buy, renovate and add storeys to real buildings in nine Swiss city centres
 (Zürich, Genève, Lausanne, Zug, Luzern, Basel, Bern, St. Gallen, Lugano), rendered as 2 m voxels.
