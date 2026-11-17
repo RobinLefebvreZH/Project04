@@ -1,4 +1,4 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import * as THREE from '../vendor/three.module.min.js';
 import { CELL, BLOCK } from './world.js';
 
 const FLOAT_SECONDS = 1.8;

@@ -46,6 +46,7 @@ export function renderHome(root, { onNew, onLoad }) {
         `<button class="menu-item" data-view="settings"><span>${t('menu.settings')}</span></button>`,
         `<button class="menu-item" data-view="how"><span>${t('menu.how')}</span></button>`,
         `<button class="menu-item" data-view="credits"><span>${t('menu.credits')}</span></button>`,
+        `<button class="menu-item" data-view="about"><span>${t('menu.about')}</span></button>`,
       ].join('');
       return `<p class="lead">${esc(t('home.lead'))}</p><nav class="menu">${items}</nav>`;
     },
@@ -118,16 +119,23 @@ export function renderHome(root, { onNew, onLoad }) {
       const boardHtml = board.length
         ? `<ol class="board">${board.map((e) => `<li><span>${esc(t(`profile.${e.p}.name`))} · ${e.d}</span><span class="num">${e.exec}/100 · ${chf(e.aum)}</span></li>`).join('')}</ol>`
         : `<p class="note">${t('score.boardEmpty')}</p>`;
-      return `<h3>${t('home.board')}</h3>${boardHtml}
-        <h3>${t('home.data')}</h3>
-        <p class="note">${esc(t('home.dataZurich'))}</p>
-        <p class="note">${esc(t('home.dataOther'))}</p>
-        <p class="note">${esc(t('home.dataWiki'))}</p>
-        <p class="note">${esc(t('home.assumptions'))}</p>`;
+      return `${boardHtml}<p class="note">${esc(t('home.assumptions'))}</p>`;
+    },
+
+    about() {
+      return `<h3>${t('about.imprint')}</h3>
+        <p class="note">${esc(t('about.imprintText'))}<br>${t('about.contact')}: <a href="https://robin-lefebvre.com" target="_blank" rel="noopener">robin-lefebvre.com</a></p>
+        <h3>${t('about.privacy')}</h3><p class="note">${esc(t('about.privacyText'))}</p>
+        <h3>${t('about.licences')}</h3>
+        <p class="note">${esc(t('about.licenceSwisstopo'))}</p>
+        <p class="note">${esc(t('about.licenceZurich'))}</p>
+        <p class="note">${esc(t('about.licencePhotos'))}</p>
+        <p class="note">${esc(t('about.licenceCode'))}</p>
+        <h3>${t('about.disclaimer')}</h3><p class="note">${esc(t('about.disclaimerText'))}</p>`;
     },
   };
 
-  const TITLES = { new: 'menu.new', load: 'menu.load', settings: 'menu.settings', how: 'menu.how', credits: 'menu.credits' };
+  const TITLES = { new: 'menu.new', load: 'menu.load', settings: 'menu.settings', how: 'menu.how', credits: 'menu.credits', about: 'menu.about' };
 
   root.innerHTML = '<div class="home-backdrop"></div><div class="home-shade"></div><section class="home-panel"></section>';
   const panel = root.querySelector('.home-panel');

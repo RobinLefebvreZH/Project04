@@ -1,4 +1,4 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import * as THREE from '../vendor/three.module.min.js';
 import { CELL, BLOCK, groundAt, surfaceAt, maxSurfaceAround } from './world.js';
 
 const MIN_PITCH = 0.06, MAX_PITCH = 1.53, MIN_DIST = 25, MAX_DIST = 7000;

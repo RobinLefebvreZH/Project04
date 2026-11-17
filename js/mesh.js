@@ -1,4 +1,4 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import * as THREE from '../vendor/three.module.min.js';
 import { CELL, BLOCK, hash2, artOf } from './world.js';
 
 export const KIND = { terrain: 0, wall: 1, roof: 2, water: 3, leaf: 4, glass: 5, flat: 6, side: 7, wood: 8, deck: 9 };

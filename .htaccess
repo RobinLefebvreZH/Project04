@@ -1,0 +1,18 @@
+AddType application/octet-stream .bin
+AddType text/javascript .js
+AddType text/css .css
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(bin|jpg)$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
+  <FilesMatch "\.(html|js|css)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript
+</IfModule>
+
+DirectoryIndex index.html

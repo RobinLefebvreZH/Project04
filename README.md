@@ -12,6 +12,13 @@ python3 -m http.server 8000
 
 Then open http://localhost:8000.
 
+## Deploy
+
+The game is a folder of static files with no build step and no outside dependencies.
+
+- OVH or any Apache host: upload `index.html`, `.htaccess` and the folders `css`, `data`, `js`, `vendor` and `wiki` into a folder such as `www/swissblocks`.
+- Vercel: import the repository as a project with no framework preset; `vercel.json` sets the cache headers.
+
 ## Play
 
 The home menu has New game, Load game (three save slots), Settings (language, graphics quality, game pace, labels, minimap, animated backdrop), How to play and the leaderboard.
@@ -39,6 +46,7 @@ js/main.js          routing between home and game, main loop
 js/home.js          home menu: new game, load game, settings, help, credits
 js/backdrop.js      animated city behind the home menu
 js/settings.js      persisted player settings
+vendor/             three.js r160 (MIT licence)
 js/ui.js            in-game interface
 js/modal.js         modal dialog
 js/i18n.js          translations and language switching
