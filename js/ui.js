@@ -260,9 +260,11 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
       economy.oldTown(b) ? `<span class="tag">${t('tag.oldTown')}</span>` : '',
     ].join('');
     const year = world.rows[b][5];
-    let h = `<button class="icon close" data-action="close" title="${t('info.close')}"><svg><use href="#i-close"/></svg></button>
-      <h2>${esc(label(b))}</h2><div class="sub">${sub.map(esc).join(' · ')}</div><div class="tags">${tags}</div>`;
-    if (landmark) h += wikiCard(landmark);
+    const peek = el.classList.contains('peek');
+    const head = `<button class="grab" data-action="peek" aria-expanded="${!peek}" aria-label="${t(peek ? 'info.expand' : 'info.collapse')}"></button>
+      <button class="icon close" data-action="close" title="${t('info.close')}"><svg><use href="#i-close"/></svg></button>
+      <div class="info-head"><h2>${esc(label(b))}</h2><div class="sub">${sub.map(esc).join(' · ')}</div><div class="tags">${tags}</div></div>`;
+    let h = landmark ? wikiCard(landmark) : '';
     h += `<hr>${row(t('info.height'), `${decimal(world.rows[b][3] / 10, 1)} m${world.extra[b] ? ` +${world.extra[b] * BLOCK} m` : ''}`)}
       ${row(t('info.footFloors'), `${integer(economy.footprint(b))} m² · ${economy.floors(b)}`)}
       ${row(t('info.age'), year > 1800 ? String(year) : t('info.ageEstimate', { n: economy.age(b) }))}`;
@@ -275,6 +277,8 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
         + row(t('info.rent'), chf(rent))
         + row(t('info.yield'), percent((rent * 12) / value, 2));
     }
+    const facts = h;
+    h = '';
     if (o) {
       const flow = economy.oFlow(o, k), v = economy.oValue(o), ds = g.defects.filter((d) => d.k === k);
       h += `<hr>${row(t('info.paid'), chf(o.paid))}
@@ -311,22 +315,27 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
     } else if (!landmark) {
       h += `<hr><p class="note">${t(world.name[b] ? 'info.public' : 'info.notTradable')}</p>`;
     }
-    el.innerHTML = h;
+    el.innerHTML = `${head}<div class="info-facts">${facts}</div><div class="info-deal">${h}</div>`;
   }
 
   const sheet = (open) => document.getElementById('sidebar').classList.toggle('open', open);
 
   function select(b) {
     sheet(false);
-    if (b !== selected) imageIndex = 0;
+    if (b !== selected) {
+      imageIndex = 0;
+      $('info').classList.remove('peek');
+    }
     selected = b;
     const card = world.landmark.get(b);
     scene.select(b, card ? card.bids.map((x) => x - 1) : []);
+    overlay.setMarker(b);
     renderInfo();
   }
 
-  function focus(b) {
-    controls.flyTo((world.cx[b] + 0.5) * 2, (world.cy[b] + 0.5) * 2, Math.max(250, Math.min(700, controls.orbit.dist)));
+  function focus(b, keepDistance = false) {
+    const d = keepDistance ? controls.orbit.dist : Math.max(250, Math.min(700, controls.orbit.dist));
+    controls.flyTo((world.cx[b] + 0.5) * 2, (world.cy[b] + 0.5) * 2, d);
     select(b);
   }
 
@@ -341,6 +350,7 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
     const a = el.dataset.action, v = el.dataset.value, key = el.dataset.key;
     switch (a) {
       case 'close': return select(-1);
+      case 'peek': $('info').classList.toggle('peek'); return renderInfo();
       case 'goto': e.preventDefault(); return gotoOwned(key);
       case 'buy': return economy.buy(selected, ltv / 100);
       case 'sell': play('coin'); return economy.sell(key);
@@ -437,7 +447,13 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
     el.textContent = t(k, p);
     box.appendChild(el);
     setTimeout(() => el.remove(), 4600);
-    while (box.children.length > 3) box.firstChild.remove();
+    trimToasts();
+  }
+
+  function trimToasts() {
+    const box = $('toasts');
+    const max = matchMedia('(max-width: 900px)').matches ? 2 : 3;
+    while (box.children.length > max) box.firstChild.remove();
   }
 
   function showProfiles(required = false) {
@@ -666,6 +682,7 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
     el.className = `toast panel goal ${title ? 'big' : ''}`;
     el.innerHTML = `<span class="kind">${t(title ? 'goal.newTitle' : 'goal.achieved')}</span><b>${esc(t(k))}</b><small>${rewardText(reward)}</small>`;
     box.appendChild(el);
+    trimToasts();
     setTimeout(() => el.remove(), 5200);
   }
 

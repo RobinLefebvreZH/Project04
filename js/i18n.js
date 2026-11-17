@@ -156,6 +156,8 @@ const D = {
   'tag.oldTown': ['Old town', 'Altstadt', 'Vieille ville', 'Centro storico'],
 
   'info.close': ['Close', 'Schliessen', 'Fermer', 'Chiudi'],
+  'info.collapse': ['Collapse', 'Einklappen', 'Réduire', 'Comprimi'],
+  'info.expand': ['Expand', 'Ausklappen', 'Agrandir', 'Espandi'],
   'info.height': ['Height (3D model)', 'Höhe (3D-Modell)', 'Hauteur (modèle 3D)', 'Altezza (modello 3D)'],
   'info.footFloors': ['Footprint · floors', 'Grundfläche · Geschosse', 'Emprise · étages', 'Impronta · piani'],
   'info.age': ['Built', 'Baujahr', 'Construction', 'Costruzione'],
@@ -582,6 +584,7 @@ const D = {
   'tut.money.text': ['Cash, mortgages, net worth and monthly cash flow are always up here. If cash stays negative for 3 months, the bank sells a building.', 'Cash, Hypotheken, Nettovermögen und Cashflow stehen immer hier oben. Bleibt das Cash 3 Monate negativ, verkauft die Bank ein Gebäude.', 'Liquidités, hypothèques, patrimoine net et flux mensuel sont toujours ici. Si vos liquidités restent négatives 3 mois, la banque vend un immeuble.', 'Liquidità, ipoteche, patrimonio netto e flusso mensile sono sempre qui. Se la liquidità resta negativa per 3 mesi, la banca vende un edificio.'],
   'tut.goals.title': ['Follow your goals', 'Verfolge deine Ziele', 'Suivez vos objectifs', 'Segui i tuoi obiettivi'],
   'tut.goals.text': ['Open Goals to see your missions, collections and next title. Each one pays a reward.', 'Öffne Ziele für Missionen, Sammlungen und deinen nächsten Titel. Jedes Ziel bringt eine Belohnung.', 'Ouvrez Objectifs pour voir missions, collections et prochain titre. Chacun rapporte une récompense.', 'Apri Obiettivi per vedere missioni, collezioni e il prossimo titolo. Ognuno dà una ricompensa.'],
+  'tut.goals.touch': ['Tap Dashboard, then Goals, to see your missions, collections and next title. Each one pays a reward.', 'Tippe auf Übersicht und dann auf Ziele für Missionen, Sammlungen und deinen nächsten Titel. Jedes Ziel bringt eine Belohnung.', 'Touchez Tableau de bord, puis Objectifs, pour voir missions, collections et prochain titre. Chacun rapporte une récompense.', 'Tocca Pannello, poi Obiettivi, per vedere missioni, collezioni e il prossimo titolo. Ognuno dà una ricompensa.'],
   'tut.defects.title': ['Keep buildings in shape', 'Halte die Häuser in Schuss', 'Entretenez vos immeubles', 'Mantieni gli edifici in forma'],
   'tut.defects.text': ['Leaks, broken heating and other defects appear over time. Repair them here before tenants cut the rent.', 'Mit der Zeit gibt es Lecks, Heizungsausfälle und andere Mängel. Repariere sie hier, bevor Mieter die Miete kürzen.', 'Fuites, pannes de chauffage et autres défauts apparaissent. Réparez-les ici avant que les locataires ne réduisent le loyer.', 'Col tempo arrivano perdite, guasti al riscaldamento e altri difetti. Riparali qui prima che gli inquilini riducano l’affitto.'],
   'tut.done.title': ['You are ready', 'Du bist bereit', 'Vous êtes prêt', 'Sei pronto'],

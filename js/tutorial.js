@@ -9,12 +9,14 @@ const STEPS = [
   { id: 'buy', target: '#info', until: (s) => s.owned > s.ownedAtStart, suggest: true },
   { id: 'time', target: '#topbar .speed', until: (s) => s.speed > 0, running: true },
   { id: 'money', target: '#topbar' },
-  { id: 'goals', target: '#tabs [data-tab="goals"]', until: (s) => s.hud.tab === 'goals' },
-  { id: 'defects', target: '#tabs [data-tab="defects"]' },
+  { id: 'goals', target: '#tabs [data-tab="goals"]', until: (s) => s.hud.tab === 'goals', sheet: true, narrow: true },
+  { id: 'defects', target: '#tabs [data-tab="defects"]', sheet: true },
   { id: 'done' },
 ];
 
 const isTouch = () => matchMedia('(pointer: coarse)').matches;
+const isNarrow = () => matchMedia('(max-width: 900px)').matches;
+const BOTTOM = '#info, #sidebar, #bPanel, #tools';
 
 export function createTutorial({ hud, economy, onFinish }) {
   const root = document.getElementById('coach');
@@ -41,8 +43,13 @@ export function createTutorial({ hud, economy, onFinish }) {
     return best;
   }
 
+  function targetOf(step) {
+    if (step.sheet && isNarrow() && !document.getElementById('sidebar').classList.contains('open')) return document.getElementById('bPanel');
+    return step.target && document.querySelector(step.target);
+  }
+
   function place(step) {
-    const target = step.target && document.querySelector(step.target);
+    const target = targetOf(step);
     const visible = target && target.offsetParent !== null && !target.hidden;
     ring.hidden = !visible;
     root.classList.toggle('centered', !visible);
@@ -53,9 +60,9 @@ export function createTutorial({ hud, economy, onFinish }) {
     const r = target.getBoundingClientRect();
     const pad = 6;
     Object.assign(ring.style, { left: `${r.left - pad}px`, top: `${r.top - pad}px`, width: `${r.width + pad * 2}px`, height: `${r.height + pad * 2}px` });
-    if (innerWidth < 700) {
+    if (isNarrow()) {
       box.style.left = box.style.top = '';
-      root.classList.toggle('dock-top', r.top + r.bottom > innerHeight);
+      root.classList.toggle('dock-top', !!target.closest(BOTTOM) || r.top + r.bottom > innerHeight);
       return;
     }
     root.classList.remove('dock-top');
@@ -73,7 +80,7 @@ export function createTutorial({ hud, economy, onFinish }) {
 
   function render() {
     const step = STEPS[index];
-    const key = step.touch && isTouch() ? `tut.${step.id}.touch` : `tut.${step.id}.text`;
+    const key = (step.touch && isTouch()) || (step.narrow && isNarrow()) ? `tut.${step.id}.touch` : `tut.${step.id}.text`;
     const last = index === STEPS.length - 1;
     box.innerHTML = `<span class="kind">${t('tut.step', { n: index + 1, total: STEPS.length })}</span>
       <h3>${esc(t(`tut.${step.id}.title`))}</h3>
@@ -92,6 +99,7 @@ export function createTutorial({ hud, economy, onFinish }) {
     const step = STEPS[index];
     if (step.id === 'buy') ownedAtStart = count();
     if (!step.running) hud.setSpeed(0);
+    if (step.sheet && isNarrow() && hud.selected >= 0) hud.select(-1);
     render();
     return null;
   }

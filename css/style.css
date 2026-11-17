@@ -160,6 +160,9 @@ button.large { font-size: 17px; padding: 14px 28px; }
 }
 .label.q { font-size: 14px; letter-spacing: 0.02em; }
 .label.own { color: #fff; background: var(--red); padding: 1px 5px; text-shadow: none; }
+.marker { position: absolute; left: 0; top: 0; z-index: 3; will-change: transform; pointer-events: none; }
+.marker svg { display: block; width: 20px; height: 26px; fill: var(--red); stroke: #fff; stroke-width: 1.6; stroke-linejoin: round; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45)); animation: bob 0.9s ease-in-out infinite alternate; }
+@keyframes bob { from { transform: translateY(-7px); } to { transform: none; } }
 .crosshair { position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; z-index: 3; pointer-events: none; }
 .crosshair::before, .crosshair::after { content: ""; position: absolute; background: #fff; box-shadow: 0 0 2px #000; }
 .crosshair::before { left: 6px; top: 0; width: 2px; height: 14px; }
@@ -345,6 +348,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 10px 0; }
 .coach.centered { background: rgba(17, 17, 17, 0.32); }
 .coach.centered .coach-box { left: 50% !important; top: 50% !important; transform: translate(-50%, -50%); width: 420px; }
 .panel-toggle { display: none; }
+.grab { display: none; }
 
 :focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
 a.button { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; color: inherit; background: var(--paper); border: 1px solid var(--ink); padding: 6px 10px; line-height: 1.2; cursor: pointer; }
@@ -396,7 +400,7 @@ a.menu-item { color: inherit; text-decoration: none; }
     top: auto;
     bottom: 0;
     width: auto;
-    height: 62%;
+    height: 56%;
     transform: translateY(105%);
     transition: transform 0.25s ease;
     z-index: 6;
@@ -406,7 +410,17 @@ a.menu-item { color: inherit; text-decoration: none; }
   .tabs { overflow-x: auto; }
   .tabs button { padding: 12px 10px; font-size: 12px; }
 
-  .info { left: 0; right: 0; width: auto; top: auto; bottom: 0; max-height: 58%; padding-bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 7; }
+  .info { background: var(--paper); left: 0; right: 0; width: auto; top: auto; bottom: 0; max-height: 48%; padding-top: 22px; padding-bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 7; display: flex; flex-direction: column; }
+  .info > * { flex: none; }
+  .info .close { top: 16px; }
+  .info-deal { order: 1; }
+  .info-facts { order: 2; }
+  .info-deal > hr:first-child { margin-top: 8px; }
+  .grab { display: block; position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: 88px; height: 22px; padding: 0; border: 0; background: transparent; }
+  .grab::before { content: ""; display: block; width: 40px; height: 4px; margin: 8px auto 0; background: #c4c4c0; border-radius: 2px; }
+  .info.peek { overflow: hidden; }
+  .info.peek .info-deal, .info.peek .info-facts { display: none; }
+  .game:has(#info:not([hidden])) .search { display: none; }
   .wiki-photo img { height: 150px; }
 
   .hint, .mini, .nav { display: none !important; }
@@ -426,13 +440,20 @@ a.menu-item { color: inherit; text-decoration: none; }
     border-color: var(--ink);
     box-shadow: var(--shadow);
   }
-  .sidebar.open ~ .panel-toggle { bottom: calc(62% + 8px); z-index: 7; }
-  .toasts { top: calc(150px + env(safe-area-inset-top)); width: calc(100% - 24px); }
-  .toast { max-width: 100%; }
+  .sidebar.open ~ .panel-toggle { bottom: calc(56% + 8px); z-index: 7; }
+  .toasts { top: calc(146px + env(safe-area-inset-top)); width: calc(100% - 24px); gap: 4px; }
+  .toast { max-width: 100%; padding: 7px 10px; font-size: 12px; line-height: 1.35; }
+  .toast.goal.big { padding: 9px 12px; }
+  .toast.goal.big b { font-size: 16px; }
   .label { font-size: 10px; }
   .label.q { font-size: 12px; }
 
-  .coach-box { left: 12px !important; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); top: auto !important; width: auto; max-width: none; }
-  .coach.dock-top .coach-box { top: calc(12px + env(safe-area-inset-top)) !important; bottom: auto; }
+  .coach-box { left: 8px !important; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom)); top: auto !important; width: auto; max-width: none; padding: 12px 14px; border-top-width: 3px; }
+  .coach.dock-top .coach-box { top: calc(8px + env(safe-area-inset-top)) !important; bottom: auto; }
+  .coach-box .kind { margin-bottom: 2px; }
+  .coach-box h3 { font-size: 15px; margin: 2px 0 4px; }
+  .coach-box p { font-size: 13px; line-height: 1.4; }
+  .coach-box .buttons { margin-top: 10px; gap: 6px; }
+  .coach-box .buttons button { padding: 8px 12px; }
   .coach.centered .coach-box { width: auto; left: 12px !important; right: 12px; top: 50% !important; bottom: auto; transform: translateY(-50%); }
 }

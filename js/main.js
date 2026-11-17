@@ -283,7 +283,7 @@ async function startGame(key) {
       track(completed ? 'Tutorial Completed' : 'Tutorial Skipped');
     },
   });
-  hooks.pick = (b) => hud.select(b);
+  hooks.pick = (b) => (b >= 0 && narrowScreen() ? hud.focus(b, true) : hud.select(b));
   hooks.fly = (on) => hud.onFlyChange(on);
 
   const [cx, cy] = cityCenter(world);
@@ -316,6 +316,24 @@ async function startGame(key) {
   run(session);
 }
 
+const narrowScreen = () => matchMedia('(max-width: 900px)').matches;
+const INSET_PANELS = '#topbar, #search, #info, #sidebar.open, #coach:not([hidden]) .coach-box';
+
+function viewInsets() {
+  if (!narrowScreen()) return [0, 0];
+  const H = innerHeight;
+  let top = 0, bottom = 0;
+  for (const el of document.querySelectorAll(INSET_PANELS)) {
+    if (el.hidden) continue;
+    const r = el.getBoundingClientRect();
+    if (!r.height) continue;
+    if (r.top < H * 0.35) top = Math.max(top, r.bottom);
+    else if (r.bottom > H * 0.65) bottom = Math.max(bottom, H - r.top);
+  }
+  if (H - top - bottom < 140) top = Math.max(0, H - bottom - 140);
+  return [top, bottom];
+}
+
 function run(s) {
   let last = performance.now(), monthClock = 0, daylight = 1, fps = 60, labelClock = 0, miniClock = 0;
   const loop = (now) => {
@@ -339,8 +357,13 @@ function run(s) {
     document.getElementById('needle').style.transform = `rotate(${s.controls.heading}rad)`;
     s.fx.update(dt);
     s.scene.render(now / 1000);
+    s.overlay.drawMarker();
     labelClock += dt;
-    if (labelClock > 0.05) { labelClock = 0; s.overlay.drawLabels(); }
+    if (labelClock > 0.05) {
+      labelClock = 0;
+      s.overlay.drawLabels();
+      s.scene.setInsets(...viewInsets());
+    }
     miniClock += dt;
     if (miniClock > 0.15) { miniClock = 0; s.overlay.drawMinimap(); }
     if (session === s) s.frame = requestAnimationFrame(loop);
@@ -349,6 +372,7 @@ function run(s) {
 }
 
 function route() {
+  document.documentElement.dataset.ready = '1';
   const unsupported = browserSupport();
   if (unsupported) {
     homeEl.hidden = true;

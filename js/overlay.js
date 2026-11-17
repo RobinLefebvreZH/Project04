@@ -29,6 +29,12 @@ export function createOverlay({ world, camera, controls, canvas, labelLayer, min
   const pool = [];
   const v = new THREE.Vector3();
   let visible = true;
+  let marked = -1;
+  const marker = document.createElement('div');
+  marker.className = 'marker';
+  marker.hidden = true;
+  marker.innerHTML = '<svg viewBox="0 0 20 26" aria-hidden="true"><path d="M7 1h6v11h6L10 25 1 12h6z"/></svg>';
+  labelLayer.appendChild(marker);
 
   const mctx = minimap.getContext('2d');
   const MW = minimap.width, MH = minimap.height;
@@ -96,6 +102,25 @@ export function createOverlay({ world, camera, controls, canvas, labelLayer, min
     for (let i = n; i < pool.length; i++) pool[i].style.display = 'none';
   }
 
+  function drawMarker() {
+    const b = marked;
+    if (b < 0 || controls.flying) {
+      marker.hidden = true;
+      return;
+    }
+    const r = canvas.getBoundingClientRect();
+    v.set((world.cx[b] + 0.5) * CELL, world.topMax[b] * BLOCK + 3, (world.cy[b] + 0.5) * CELL);
+    v.project(camera);
+    if (v.z > 1 || Math.abs(v.x) > 1 || v.y > 1.2 || v.y < -1) {
+      marker.hidden = true;
+      return;
+    }
+    const lift = visible && economy.owned(b) ? 22 : 4;
+    const sx = ((v.x + 1) / 2) * r.width, sy = Math.max(30, ((1 - v.y) / 2) * r.height - lift);
+    marker.hidden = false;
+    marker.style.transform = `translate(${sx}px,${sy}px) translate(-50%,-100%)`;
+  }
+
   function drawMinimapBase(coverColor) {
     const img = mctx.createImageData(world.W, world.H);
     for (let i = 0; i < world.N; i++) {
@@ -152,6 +177,8 @@ export function createOverlay({ world, camera, controls, canvas, labelLayer, min
 
   return {
     drawLabels,
+    drawMarker,
+    setMarker(b) { marked = b; drawMarker(); },
     drawMinimap,
     drawMinimapBase,
     get visible() { return visible; },
@@ -159,6 +186,7 @@ export function createOverlay({ world, camera, controls, canvas, labelLayer, min
     dispose() {
       minimap.removeEventListener('click', onMiniClick);
       for (const el of pool) el.remove();
+      marker.remove();
     },
   };
 }

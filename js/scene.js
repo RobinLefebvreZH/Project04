@@ -247,11 +247,18 @@ export async function createScene(canvas, world, onProgress = () => {}, quality 
     else if (fps > 50 && radius < maxRadius) radius += 2;
   }
 
+  let shift = 0, shiftGoal = 0;
+  function applyShift() {
+    const w = innerWidth, h = innerHeight;
+    if (Math.abs(shift) < 0.5) camera.clearViewOffset();
+    else camera.setViewOffset(w, h, 0, shift, w, h);
+  }
+
   function resize() {
     const w = innerWidth, h = innerHeight;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
-    camera.updateProjectionMatrix();
+    applyShift();
   }
   resize();
   addEventListener('resize', resize);
@@ -273,7 +280,12 @@ export async function createScene(canvas, world, onProgress = () => {}, quality 
     setHeat(on) { uniforms.heat.value = on ? 1 : 0; },
     setDaylight,
     adaptDetail,
+    setInsets(top, bottom) { shiftGoal = Math.round((bottom - top) / 2); },
     render(time) {
+      if (shift !== shiftGoal) {
+        shift = Math.abs(shiftGoal - shift) < 1 ? shiftGoal : shift + (shiftGoal - shift) * 0.18;
+        applyShift();
+      }
       uniforms.time.value = time;
       renderer.render(scene, camera);
     },
