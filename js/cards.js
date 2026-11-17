@@ -1,6 +1,7 @@
 import { t } from './i18n.js';
 import { escapeHtml as esc } from './format.js';
 import { openModal, closeModal, modalOpen } from './modal.js';
+import { play } from './sound.js';
 
 const rnd = Math.random;
 const pick = (list) => list[(rnd() * list.length) | 0];
@@ -167,6 +168,7 @@ export function createCards(api, host) {
   function show(G, card, key, ctx) {
     const resumeSpeed = G.speed || 1;
     host.pause();
+    play('card');
     if (ctx?.b !== undefined && ctx.city === api.world.key) host.focus(ctx.b);
     const params = describe(card, G, key, ctx);
     const options = card.options.map((opt, i) => `
@@ -181,6 +183,7 @@ export function createCards(api, host) {
       for (const btn of box.querySelectorAll('[data-option]')) {
         btn.addEventListener('click', () => {
           const opt = card.options[+btn.dataset.option];
+          play('click');
           closeModal();
           opt.apply?.(G, api, key, card, ctx);
           api.news(`card.${card.id}.news`, { choice: { goal: `card.${card.id}.${opt.k}` }, ...params });

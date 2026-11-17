@@ -1,6 +1,7 @@
 import { t } from './i18n.js';
 import { chf, escapeHtml as esc } from './format.js';
 import { openModal, closeModal, modalOpen } from './modal.js';
+import { play } from './sound.js';
 
 export const RIVALS = [
   { name: 'Nordwand Capital', cash: 6e6, appetite: 0.22, ceiling: 1.18 },
@@ -81,6 +82,7 @@ export function createRivals(api, host) {
     const resumeSpeed = G.speed || 1;
     host.pause();
     host.focus(b);
+    play('card');
     const v = api.value(b);
     const bidders = RIVALS.map((r, i) => ({ i, max: v * (0.95 + rnd() * (r.ceiling - 0.95)) })).filter((x) => G.rivals[x.i].cash >= x.max * 0.3);
     const state = { price: v * 0.85, leader: bidders.length ? bidders[0].i : -1, log: [], timer: null, left: ROUND_SECONDS, done: false };
@@ -91,6 +93,7 @@ export function createRivals(api, host) {
       if (state.done) return;
       state.done = true;
       clearInterval(state.timer);
+      play('gavel');
       closeModal();
       if (playerWins) {
         if (api.buy(b, 0.8, { price: state.price })) api.news('auction.won', { name, price: money(state.price) });
@@ -130,6 +133,7 @@ export function createRivals(api, host) {
       state.leader = challenger.i;
       state.left = ROUND_SECONDS;
       state.log.push(t('auction.raise', { rival: RIVALS[challenger.i].name, price: money(state.price) }));
+      play('tick');
       render(box);
     }
 
@@ -154,6 +158,7 @@ export function createRivals(api, host) {
           state.leader = 'you';
           state.left = ROUND_SECONDS;
           state.log.push(t('auction.yourBid', { price: money(state.price) }));
+          play('tick');
           render(box);
           setTimeout(() => !state.done && respond(box), 900);
         });

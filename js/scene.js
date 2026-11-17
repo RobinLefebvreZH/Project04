@@ -37,7 +37,7 @@ void main() {
     vec2 uv = vec2((mod(b, 256.0) + 0.5) / 256.0, (floor(b / 256.0) + 0.5) / 128.0);
     vS = texture2D(stateTex, uv);
     if (heat > 0.5 && kind != 4.0) vCol = mix(vCol, heatCol(vS.g), 0.85);
-    if (abs(bid - selId) < 0.5) vSel = 1.0;
+    if (abs(bid - selId) < 0.5 || vS.a > 0.5) vSel = 1.0;
   }
   gl_Position = projectionMatrix * viewMatrix * w;
 }`;
@@ -166,6 +166,7 @@ export async function createScene(canvas, world, onProgress = () => {}, quality 
   scene.add(ground);
 
   let fullCount = 0;
+  let selectedGroup = [];
   const [minRadius, maxRadius] = quality.radius;
   let radius = Math.min(750, maxRadius);
 
@@ -262,7 +263,13 @@ export async function createScene(canvas, world, onProgress = () => {}, quality 
     setBuildingState,
     commitState() { stateTex.needsUpdate = true; },
     setPulse(b, v) { if (b >= 0 && b < STATE_W * STATE_H) stateData[b * 4 + 2] = v; },
-    select(b) { uniforms.selId.value = b >= 0 ? b + 1 : -1; },
+    select(b, group = []) {
+      for (const g of selectedGroup) stateData[g * 4 + 3] = 0;
+      selectedGroup = group.filter((g) => g >= 0 && g < STATE_W * STATE_H);
+      for (const g of selectedGroup) stateData[g * 4 + 3] = 255;
+      stateTex.needsUpdate = true;
+      uniforms.selId.value = b >= 0 ? b + 1 : -1;
+    },
     setHeat(on) { uniforms.heat.value = on ? 1 : 0; },
     setDaylight,
     adaptDetail,

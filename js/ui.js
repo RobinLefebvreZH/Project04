@@ -5,6 +5,11 @@ import { t, cityName, dateLabel, localized, buildingName, getLanguage, onLanguag
 import { chf, signedChf, integer, decimal, percent, escapeHtml as esc } from './format.js';
 import { openModal, closeModal } from './modal.js';
 import { PROFILE_FIGURES } from './figures.js';
+import { play } from './sound.js';
+import { settings, setSetting } from './settings.js';
+import { drawSeasonCard, recordCode, shareText } from './season.js';
+import { feedbackLink } from './feedback.js';
+import { track } from './analytics.js';
 
 const $ = (id) => document.getElementById(id);
 const row = (label, value, cls = '') => `<div class="row"><span>${label}</span><span class="num ${cls}">${value}</span></div>`;
@@ -56,7 +61,10 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
     $('sTitle').textContent = t(`title.${g.goals.title}`);
     const defects = g.defects.length;
     document.querySelector('#tabs [data-tab="defects"]').innerHTML = defects ? `${t('tab.defects')} <span class="count">${defects}</span>` : t('tab.defects');
-    for (const btn of document.querySelectorAll('#tabs button')) btn.classList.toggle('on', btn.dataset.tab === tab);
+    for (const btn of document.querySelectorAll('#tabs button')) {
+      btn.classList.toggle('on', btn.dataset.tab === tab);
+      btn.setAttribute('aria-selected', btn.dataset.tab === tab);
+    }
   }
 
   function setSpeed(s) {
@@ -312,7 +320,8 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
     sheet(false);
     if (b !== selected) imageIndex = 0;
     selected = b;
-    scene.select(b);
+    const card = world.landmark.get(b);
+    scene.select(b, card ? card.bids.map((x) => x - 1) : []);
     renderInfo();
   }
 
@@ -334,12 +343,12 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
       case 'close': return select(-1);
       case 'goto': e.preventDefault(); return gotoOwned(key);
       case 'buy': return economy.buy(selected, ltv / 100);
-      case 'sell': return economy.sell(key);
+      case 'sell': play('coin'); return economy.sell(key);
       case 'renovate': return economy.renovate(selected);
       case 'extend': return economy.extend(selected);
       case 'refinance': return economy.refinance(key, +v);
-      case 'repair': return economy.repair(+el.dataset.id, false);
-      case 'repairAll': return economy.repairAll();
+      case 'repair': play('click'); return economy.repair(+el.dataset.id, false);
+      case 'repairAll': play('click'); return economy.repairAll();
       case 'maint': return economy.setMaintenance(v);
       case 'board': boardSort = v; return renderTab();
       case 'city': return v !== world.key && onCity(v);
@@ -374,7 +383,7 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
     listen($(id), 'input', onInput);
   }
   for (const btn of document.querySelectorAll('#tabs button')) {
-    listen(btn, 'click', () => { tab = btn.dataset.tab; renderTab(); });
+    listen(btn, 'click', () => { tab = btn.dataset.tab; play('click'); renderTab(); });
   }
   listen($('bPanel'), 'click', () => {
     const open = !$('sidebar').classList.contains('open');
@@ -424,6 +433,7 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
     const box = $('toasts');
     const el = document.createElement('div');
     el.className = `toast panel ${cls || ''}`;
+    if (cls === 'neg') play('alert');
     el.textContent = t(k, p);
     box.appendChild(el);
     setTimeout(() => el.remove(), 4600);
@@ -470,7 +480,7 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
     setSpeed(0);
     const items = ['home.how1', 'home.how2', 'home.how3', 'home.how4'].map((k) => `<li>${esc(t(k))}</li>`).join('');
     openModal(`<h1>${t('help.title')}</h1><ul>${items}</ul><h3>${t('home.controls')}</h3><p class="note">${esc(t('home.controlsText'))}</p>
-      <div class="buttons"><button class="primary" data-close>${t('help.resume')}</button><button data-tutorial>${t('tut.replay')}</button><button class="danger" data-restart>${t('help.restart')}</button></div>`, (box) => {
+      <div class="buttons"><button class="primary" data-close>${t('help.resume')}</button><button data-tutorial>${t('tut.replay')}</button><a class="button" href="${esc(feedbackLink({ City: world.key, Month: G().t }))}" target="_blank" rel="noopener">${t('menu.feedback')}</a><button class="danger" data-restart>${t('help.restart')}</button></div>`, (box) => {
       box.querySelector('[data-close]').addEventListener('click', closeModal);
       box.querySelector('[data-tutorial]').addEventListener('click', () => {
         closeModal();
@@ -480,12 +490,36 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
     });
   }
 
+  function seasonRecord() {
+    const g = G();
+    const s = economy.scores();
+    const cities = [...new Set(Object.values(g.owned).map((o) => o.city))];
+    const record = {
+      name: settings().playerName.trim(),
+      profile: g.profile,
+      title: g.goals.title,
+      aum: Math.round(s.aum),
+      rev: Math.round(s.rev),
+      exec: s.exec,
+      parts: s.parts.map(([k, p, v, max]) => [t(k, p), v, max]),
+      months: g.t,
+      month: g.month,
+      year: g.year,
+      cities: cities.length ? cities : [world.key],
+      date: new Date().toISOString().slice(0, 10),
+    };
+    record.code = recordCode(record);
+    return record;
+  }
+
   function showSeason(entry) {
     setSpeed(0);
+    play('goal');
     const board = getBoard();
     const rank = (key) => 1 + board.filter((x) => x[key] > entry[key]).length;
     const s = economy.scores();
     const g = G();
+    track('Season Completed', { profile: g.profile, title: t(`title.${g.goals.title}`), exec: Math.floor(s.exec / 10) * 10 });
     openModal(`<h1>${t('season.title')}</h1>
       <p class="lead">${esc(t('season.summary', { profile: g.profile, months: g.t, nw: { chf: economy.netWorth() } }))}</p>
       <div class="cards">
@@ -493,7 +527,45 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
         <div class="card"><span>${t('score.noi')}</span><b>${chf(s.rev)}</b><small>${t('score.rank', { r: rank('rev'), n: board.length })}</small></div>
         <div class="card"><span>${t('score.exec')}</span><b>${s.exec} / 100</b><small>${t('score.rank', { r: rank('exec'), n: board.length })}</small></div>
       </div>${scoreParts(s)}
+      <h3>${t('record.title')}</h3>
+      <p class="note">${esc(t('record.lead'))}</p>
+      <label class="field"><span>${t('record.name')}</span><input data-name maxlength="40" autocomplete="name" value="${esc(settings().playerName)}"></label>
+      <img class="record" data-record alt="${esc(t('record.alt'))}">
+      <div class="buttons">
+        <a class="button primary" data-download download="swiss-blocks-season.png">${t('record.download')}</a>
+        <button data-share hidden>${t('record.shareButton')}</button>
+        <button data-copy>${t('record.copy')}</button>
+        <a class="button" data-linkedin target="_blank" rel="noopener">${t('record.linkedin')}</a>
+      </div>
+      <p class="note">${esc(t('record.note'))}</p>
       <div class="buttons"><button class="primary" data-again>${t('season.again')}</button><button data-close>${t('season.view')}</button></div>`, (box) => {
+      let canvas = null;
+      const refresh = () => {
+        const record = seasonRecord();
+        canvas = drawSeasonCard(record);
+        const url = canvas.toDataURL('image/png');
+        box.querySelector('[data-record]').src = url;
+        box.querySelector('[data-download]').href = url;
+        box.querySelector('[data-linkedin]').href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent('https://swissblocks.app/')}`;
+        box.dataset.text = shareText(record);
+      };
+      refresh();
+      box.querySelector('[data-name]').addEventListener('input', (e) => {
+        setSetting('playerName', e.target.value);
+        refresh();
+      });
+      const shareBtn = box.querySelector('[data-share]');
+      if (navigator.canShare) shareBtn.hidden = false;
+      shareBtn.addEventListener('click', () => {
+        canvas.toBlob((blob) => {
+          const file = new File([blob], 'swiss-blocks-season.png', { type: 'image/png' });
+          const data = { text: box.dataset.text, files: [file] };
+          (navigator.canShare(data) ? navigator.share(data) : navigator.share({ text: box.dataset.text })).catch(() => null);
+        });
+      });
+      box.querySelector('[data-copy]').addEventListener('click', (e) => {
+        navigator.clipboard?.writeText(box.dataset.text).then(() => { e.target.textContent = t('record.copied'); }).catch(() => null);
+      });
       box.querySelector('[data-again]').addEventListener('click', () => showProfiles(true));
       box.querySelector('[data-close]').addEventListener('click', closeModal);
     });
@@ -532,10 +604,16 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
   function toggleFly() {
     controls.toggleFlying();
   }
+  function toggleSound() {
+    setSetting('sound', !settings().sound);
+    $('tSound').classList.toggle('on', settings().sound);
+    play('click');
+  }
   listen($('tHeat'), 'click', toggleHeat);
   listen($('tLabels'), 'click', toggleLabels);
   listen($('tNight'), 'click', toggleNight);
   listen($('tFly'), 'click', toggleFly);
+  listen($('tSound'), 'click', toggleSound);
   listen($('bPause'), 'click', () => setSpeed(0));
   listen($('bPlay'), 'click', () => setSpeed(1));
   listen($('bFast'), 'click', () => setSpeed(4));
@@ -567,6 +645,7 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
     else if (e.code === 'KeyH') toggleHeat();
     else if (e.code === 'KeyL') toggleLabels();
     else if (e.code === 'KeyN') toggleNight();
+    else if (e.code === 'KeyM') toggleSound();
     else if (e.code === 'KeyC') controls.faceNorth();
     else if (e.code === 'Space' && !controls.flying) setSpeed(G().speed ? 0 : 1);
     else if (e.code === 'Escape') {
@@ -617,6 +696,7 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
     celebrate,
     resume(speed) { setSpeed(speed); },
     applySettings(s) {
+      $('tSound').classList.toggle('on', s.sound);
       overlay.setVisible(s.labels);
       $('tLabels').classList.toggle('on', s.labels);
       $('mini').hidden = !s.minimap;

@@ -1,7 +1,9 @@
 import { CITIES, CITY_KEYS, grossYield } from './cities.js';
 import { t, cityName, dateLabel, onLanguageChange, LANGUAGES, getLanguage, setLanguage } from './i18n.js';
 import { integer, percent, chf, escapeHtml as esc } from './format.js';
-import { PROFILE_FIGURES } from './figures.js';
+import { PROFILE_FIGURES, logoSvg } from './figures.js';
+import { feedbackLink } from './feedback.js';
+import { play } from './sound.js';
 import { PROFILES, SEASON, getBoard, listSlots, latestSlot, deleteSlot } from './economy.js';
 import { settings, setSetting, OPTIONS } from './settings.js';
 import { prefetchCity } from './world.js';
@@ -28,7 +30,7 @@ function savedAt(ms) {
   return new Intl.DateTimeFormat(getLanguage(), { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(ms));
 }
 
-export function renderHome(root, { onNew, onLoad }) {
+export function renderHome(root, { onNew, onLoad, storageOk = true }) {
   let view = 'menu';
   const draft = { profile: 'banker', city: 'zurich', rivals: true, slot: 0 };
   let confirmDelete = 0;
@@ -47,8 +49,10 @@ export function renderHome(root, { onNew, onLoad }) {
         `<button class="menu-item" data-view="how"><span>${t('menu.how')}</span></button>`,
         `<button class="menu-item" data-view="credits"><span>${t('menu.credits')}</span></button>`,
         `<button class="menu-item" data-view="about"><span>${t('menu.about')}</span></button>`,
+        `<a class="menu-item" href="${esc(feedbackLink())}" target="_blank" rel="noopener"><span>${t('menu.feedback')}</span></a>`,
       ].join('');
-      return `<p class="lead">${esc(t('home.lead'))}</p><nav class="menu">${items}</nav>`;
+      const warning = storageOk ? '' : `<p class="warning" role="alert">${esc(t('error.storage'))}</p>`;
+      return `<p class="lead">${esc(t('home.lead'))}</p>${warning}<nav class="menu" aria-label="${esc(t('menu.label'))}">${items}</nav>`;
     },
 
     new() {
@@ -100,6 +104,8 @@ export function renderHome(root, { onNew, onLoad }) {
       return `<div class="setting"><h3>${t('lang.label')}</h3>${lang}</div>
         <div class="setting"><h3>${t('settings.quality')}</h3>${segment('quality', OPTIONS.quality, s.quality)}<p class="note">${t('settings.qualityHint')}</p></div>
         <div class="setting"><h3>${t('settings.pace')}</h3>${segment('pace', OPTIONS.pace, s.pace)}<p class="note">${t('settings.paceHint')}</p></div>
+        <div class="setting"><h3>${t('settings.sound')}</h3>${toggle('sound', s.sound)}</div>
+        <div class="setting"><h3>${t('settings.volume')}</h3>${segment('volume', OPTIONS.volume, s.volume, (v) => t(`settings.volume.${OPTIONS.volume.indexOf(v)}`))}</div>
         <div class="setting"><h3>${t('settings.labels')}</h3>${toggle('labels', s.labels)}</div>
         <div class="setting"><h3>${t('settings.minimap')}</h3>${toggle('minimap', s.minimap)}</div>
         <div class="setting"><h3>${t('settings.backdrop')}</h3>${toggle('backdrop', s.backdrop)}<p class="note">${t('settings.backdropHint')}</p></div>
@@ -144,7 +150,7 @@ export function renderHome(root, { onNew, onLoad }) {
     panel.classList.toggle('wide', view === 'new');
     panel.innerHTML = `
         <header class="home-head">
-          <div class="mark" aria-hidden="true"></div>
+          ${logoSvg(56)}
           <div class="home-title"><h1>${t('app.title')}</h1><p>${t('app.subtitle')}</p></div>
         </header>
         ${view === 'menu' ? '' : `<div class="view-head"><button class="back" data-view="menu">${t('menu.back')}</button><h2>${t(TITLES[view])}</h2></div>`}
@@ -164,7 +170,10 @@ export function renderHome(root, { onNew, onLoad }) {
     if (!el || !root.contains(el)) return;
     const d = el.dataset;
     if (d.newSlot) draft.slot = +d.newSlot;
-    if (d.view) return show(d.view);
+    if (d.view) {
+      play('click');
+      return show(d.view);
+    }
     if (d.go === 'continue') return onLoad(latestSlot().slot);
     if (d.profile) { draft.profile = d.profile; return render(); }
     if (d.city) { draft.city = d.city; return render(); }
@@ -190,7 +199,7 @@ export function renderHome(root, { onNew, onLoad }) {
     }
     if (d.set === 'lang') return setLanguage(d.value);
     if (d.set) {
-      const v = d.value === 'on' ? true : d.value === 'off' ? false : d.value;
+      const v = d.value === 'on' ? true : d.value === 'off' ? false : d.set === 'volume' ? +d.value : d.value;
       setSetting(d.set, v);
       return render();
     }

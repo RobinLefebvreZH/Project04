@@ -143,7 +143,8 @@ export async function loadWorld(key, landmarks, onProgress = () => {}) {
 
   world.landmark = new Map();
   for (const [lkey, entry] of Object.entries(landmarks[key] || {})) {
-    if (entry.bid > 0) world.landmark.set(entry.bid - 1, { key: lkey, ...entry });
+    const card = { key: lkey, ...entry };
+    for (const bid of entry.bids) if (bid > 0 && bid <= world.count) world.landmark.set(bid - 1, card);
   }
   onProgress(0.38);
 

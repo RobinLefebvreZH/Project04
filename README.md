@@ -16,7 +16,7 @@ Then open http://localhost:8000.
 
 The game is a folder of static files with no build step and no outside dependencies.
 
-- OVH or any Apache host: upload `index.html`, `.htaccess` and the folders `css`, `data`, `js`, `vendor` and `wiki` into a folder such as `www/swissblocks`.
+- OVH or any Apache host: upload `index.html`, `.htaccess`, `favicon.svg`, the PNG icons, `og.png`, `manifest.webmanifest` and the folders `css`, `data`, `js`, `vendor` and `wiki`.
 - Vercel: import the repository as a project with no framework preset; `vercel.json` sets the cache headers.
 
 ## Play
@@ -46,6 +46,11 @@ js/main.js          routing between home and game, main loop
 js/home.js          home menu: new game, load game, settings, help, credits
 js/backdrop.js      animated city behind the home menu
 js/settings.js      persisted player settings
+js/config.js        site name, domain, version and contact address
+js/sound.js         synthesized sound effects
+js/analytics.js     anonymous Plausible events, only on the live domain
+js/season.js        shareable season record image
+js/feedback.js      feedback link with version and browser details
 vendor/             three.js r160 (MIT licence)
 js/ui.js            in-game interface
 js/modal.js         modal dialog

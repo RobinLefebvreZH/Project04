@@ -36,14 +36,15 @@ export function createBackdrop(container, quality) {
     place(0);
     cam.updateMatrixWorld();
     for (let i = 0; i < 30; i++) scene.updateLOD();
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const t0 = performance.now();
     const loop = (now) => {
       if (disposed) return;
       const time = (now - t0) / 1000;
-      place(time);
+      place(still ? 0 : time);
       scene.updateLOD();
       scene.render(time);
-      frame = requestAnimationFrame(loop);
+      if (!still || time < 2) frame = requestAnimationFrame(loop);
     };
     frame = requestAnimationFrame(loop);
     container.classList.add('ready');

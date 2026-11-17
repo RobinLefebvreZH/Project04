@@ -3,6 +3,7 @@ const KEY = 'swissblocks.settings';
 export const OPTIONS = {
   quality: ['low', 'medium', 'high'],
   pace: ['slow', 'normal', 'fast'],
+  volume: [0.35, 0.7, 1],
 };
 
 export const QUALITY = {
@@ -13,7 +14,7 @@ export const QUALITY = {
 
 export const MONTH_SECONDS = { slow: 10, normal: 6, fast: 3 };
 
-const DEFAULTS = { quality: 'high', pace: 'normal', labels: true, minimap: true, backdrop: true, tutorialDone: false };
+const DEFAULTS = { quality: 'high', pace: 'normal', labels: true, minimap: true, backdrop: true, sound: true, volume: 0.7, tutorialDone: false, playerName: '' };
 
 function read() {
   try {

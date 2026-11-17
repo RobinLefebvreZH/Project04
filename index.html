@@ -3,7 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Swiss Blocks</title>
+<title>Swiss Blocks: real estate strategy in real Swiss cities</title>
+<meta name="description" content="Buy, finance and grow a real estate empire in nine real Swiss city centres, rebuilt block by block from official 3D data. Free to play in English, German, French and Italian.">
+<meta name="theme-color" content="#d52b1e">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Swiss Blocks">
+<meta property="og:title" content="Swiss Blocks">
+<meta property="og:description" content="Buy, finance and grow a real estate empire in nine real Swiss city centres. Free to play.">
+<meta property="og:url" content="https://swissblocks.app/">
+<meta property="og:image" content="https://swissblocks.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -25,6 +39,11 @@
   <symbol id="i-tiltup" viewBox="0 0 16 16"><path d="M2 2h12v2H2zM8 5l5 6H9.5v4h-3v-4H3z"/></symbol>
   <symbol id="i-tiltdn" viewBox="0 0 16 16"><path d="M2 12h12v2H2zM8 11L3 5h3.5V1h3v4H13z"/></symbol>
 </svg>
+
+<noscript><p class="unsupported">Swiss Blocks needs JavaScript. Please enable it and reload the page.</p></noscript>
+<div id="fatal" class="fatal" hidden role="alertdialog" aria-modal="true" aria-labelledby="fatalTitle">
+  <div class="panel fatal-box"><h2 id="fatalTitle"></h2><p id="fatalText"></p><div class="buttons" id="fatalButtons"></div></div>
+</div>
 
 <main id="home" class="home" hidden></main>
 
@@ -63,13 +82,13 @@
   </div>
 
   <aside id="sidebar" class="panel sidebar">
-    <nav id="tabs" class="tabs">
-      <button data-tab="portfolio" data-i18n="tab.portfolio"></button>
-      <button data-tab="goals" data-i18n="tab.goals"></button>
-      <button data-tab="defects" data-i18n="tab.defects"></button>
-      <button data-tab="score" data-i18n="tab.score"></button>
-      <button data-tab="market" data-i18n="tab.market"></button>
-      <button data-tab="news" data-i18n="tab.news"></button>
+    <nav id="tabs" class="tabs" role="tablist">
+      <button data-tab="portfolio" role="tab" data-i18n="tab.portfolio"></button>
+      <button data-tab="goals" role="tab" data-i18n="tab.goals"></button>
+      <button data-tab="defects" role="tab" data-i18n="tab.defects"></button>
+      <button data-tab="score" role="tab" data-i18n="tab.score"></button>
+      <button data-tab="market" role="tab" data-i18n="tab.market"></button>
+      <button data-tab="news" role="tab" data-i18n="tab.news"></button>
     </nav>
     <div id="tabBody" class="tab-body"></div>
   </aside>
@@ -85,6 +104,7 @@
     <button id="tLabels" class="on" data-i18n="tool.labels" data-i18n-title="tool.labelsTitle"></button>
     <button id="tNight" data-i18n="tool.night" data-i18n-title="tool.nightTitle"></button>
     <button id="tFly" data-i18n="tool.fly" data-i18n-title="tool.flyTitle"></button>
+    <button id="tSound" data-i18n="tool.sound" data-i18n-title="tool.soundTitle"></button>
   </div>
 
   <div id="nav" class="panel nav">
@@ -108,18 +128,19 @@
   </div>
 
   <button id="bPanel" class="panel-toggle" data-i18n="mobile.panel"></button>
-  <div id="toasts" class="toasts"></div>
+  <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
   <div id="coach" class="coach" hidden><div class="coach-ring"></div><div class="coach-box panel"></div></div>
 </section>
 
-<div id="loading" class="loading" hidden>
+<div id="loading" class="loading" hidden role="status" aria-live="polite">
   <div class="brand" data-i18n="app.title"></div>
   <div class="bar"><i id="loadBar"></i></div>
   <div id="loadText"></div>
 </div>
 
-<div id="modal" class="modal" hidden><div id="modalBox" class="panel modal-box"></div></div>
+<div id="modal" class="modal" hidden><div id="modalBox" class="panel modal-box" role="dialog" aria-modal="true"></div></div>
 
+<script nomodule>document.body.innerHTML = '<p class="unsupported">Swiss Blocks needs a recent browser such as Chrome, Edge, Firefox or Safari 16.4 or newer.</p>';</script>
 <script type="module" src="js/main.js"></script>
 </body>
 </html>

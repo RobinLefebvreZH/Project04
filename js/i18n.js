@@ -592,10 +592,10 @@ const D = {
   'about.contact': ['Contact', 'Kontakt', 'Contact', 'Contatto'],
   'about.privacy': ['Privacy', 'Datenschutz', 'Confidentialité', 'Privacy'],
   'about.privacyText': [
-    'The game has no accounts, no cookies, no ads and no tracking. Saves, settings and the leaderboard are stored only in your own browser and never leave your device.',
-    'Das Spiel hat keine Konten, keine Cookies, keine Werbung und kein Tracking. Spielstände, Einstellungen und Bestenliste bleiben nur in deinem Browser und verlassen dein Gerät nie.',
-    'Le jeu n’a ni compte, ni cookies, ni publicité, ni suivi. Sauvegardes, paramètres et classement restent uniquement dans votre navigateur et ne quittent jamais votre appareil.',
-    'Il gioco non ha account, cookie, pubblicità né tracciamento. Salvataggi, impostazioni e classifica restano solo nel tuo browser e non lasciano mai il tuo dispositivo.',
+    'The game has no accounts, no cookies and no ads. Saves, settings and the leaderboard stay in your own browser. To count players, the website uses Plausible, a privacy-friendly analytics tool that stores no personal data and sets no cookies.',
+    'Das Spiel hat keine Konten, keine Cookies und keine Werbung. Spielstände, Einstellungen und Bestenliste bleiben in deinem Browser. Um Spieler zu zählen, nutzt die Website Plausible, ein datenschutzfreundliches Analysetool ohne Personendaten und ohne Cookies.',
+    'Le jeu n’a ni compte, ni cookies, ni publicité. Sauvegardes, paramètres et classement restent dans votre navigateur. Pour compter les joueurs, le site utilise Plausible, un outil d’analyse respectueux de la vie privée, sans données personnelles ni cookies.',
+    'Il gioco non ha account, cookie né pubblicità. Salvataggi, impostazioni e classifica restano nel tuo browser. Per contare i giocatori il sito usa Plausible, uno strumento di analisi rispettoso della privacy, senza dati personali né cookie.',
   ],
   'about.licences': ['Data and licences', 'Daten und Lizenzen', 'Données et licences', 'Dati e licenze'],
   'about.licenceSwisstopo': ['Source: Federal Office of Topography swisstopo (swissBUILDINGS3D, base map vector tiles) and Federal Statistical Office (building register), open government data.', 'Quelle: Bundesamt für Landestopografie swisstopo (swissBUILDINGS3D, Vektortiles der Basiskarte) und Bundesamt für Statistik (Gebäuderegister), Open Government Data.', 'Source : Office fédéral de topographie swisstopo (swissBUILDINGS3D, tuiles vectorielles de la carte de base) et Office fédéral de la statistique (registre des bâtiments), données ouvertes.', 'Fonte: Ufficio federale di topografia swisstopo (swissBUILDINGS3D, tessere vettoriali della carta di base) e Ufficio federale di statistica (registro degli edifici), dati aperti.'],
@@ -609,6 +609,43 @@ const D = {
     'Ceci est un jeu. Prix, loyers, règles et événements sont des estimations simplifiées et ne constituent pas un conseil financier, juridique ou fiscal. Les bâtiments et adresses proviennent de données publiques ; le jeu n’a aucun lien avec leurs propriétaires. Les investisseurs rivaux sont fictifs.',
     'Questo è un gioco. Prezzi, affitti, regole ed eventi sono stime semplificate e non costituiscono consulenza finanziaria, legale o fiscale. Edifici e indirizzi provengono da dati pubblici; il gioco non ha legami con i loro proprietari. Gli investitori rivali sono inventati.',
   ],
+  'menu.feedback': ['Send feedback', 'Feedback senden', 'Envoyer un avis', 'Invia un feedback'],
+  'menu.label': ['Main menu', 'Hauptmenü', 'Menu principal', 'Menu principale'],
+  'a11y.map': ['3D map of {city}', '3D-Karte von {city}', 'Carte 3D de {city}', 'Mappa 3D di {city}'],
+  'tool.sound': ['Sound', 'Ton', 'Son', 'Audio'],
+  'tool.soundTitle': ['Sound on or off (M)', 'Ton ein oder aus (M)', 'Son activé ou non (M)', 'Audio sì o no (M)'],
+  'settings.sound': ['Sound effects', 'Soundeffekte', 'Effets sonores', 'Effetti sonori'],
+  'settings.volume': ['Volume', 'Lautstärke', 'Volume', 'Volume'],
+  'settings.volume.0': ['Quiet', 'Leise', 'Faible', 'Basso'],
+  'settings.volume.1': ['Medium', 'Mittel', 'Moyen', 'Medio'],
+  'settings.volume.2': ['Loud', 'Laut', 'Fort', 'Alto'],
+  'error.browserTitle': ['This browser is not supported', 'Dieser Browser wird nicht unterstützt', 'Ce navigateur n’est pas pris en charge', 'Questo browser non è supportato'],
+  'error.webgl': ['Swiss Blocks needs 3D graphics (WebGL), which this browser or device has turned off. Try a recent Chrome, Edge, Firefox or Safari, or turn on hardware acceleration in your browser settings.', 'Swiss Blocks braucht 3D-Grafik (WebGL), die in diesem Browser oder Gerät ausgeschaltet ist. Versuche ein aktuelles Chrome, Edge, Firefox oder Safari oder aktiviere die Hardwarebeschleunigung in den Browsereinstellungen.', 'Swiss Blocks a besoin des graphismes 3D (WebGL), désactivés dans ce navigateur ou cet appareil. Essayez un Chrome, Edge, Firefox ou Safari récent, ou activez l’accélération matérielle dans les réglages du navigateur.', 'Swiss Blocks richiede la grafica 3D (WebGL), disattivata in questo browser o dispositivo. Prova un Chrome, Edge, Firefox o Safari recente, oppure attiva l’accelerazione hardware nelle impostazioni del browser.'],
+  'error.browser': ['This browser is too old for Swiss Blocks. Please update it, or use a recent Chrome, Edge, Firefox or Safari.', 'Dieser Browser ist zu alt für Swiss Blocks. Bitte aktualisiere ihn oder nutze ein aktuelles Chrome, Edge, Firefox oder Safari.', 'Ce navigateur est trop ancien pour Swiss Blocks. Mettez-le à jour ou utilisez un Chrome, Edge, Firefox ou Safari récent.', 'Questo browser è troppo vecchio per Swiss Blocks. Aggiornalo oppure usa un Chrome, Edge, Firefox o Safari recente.'],
+  'error.loadTitle': ['The city could not be loaded', 'Die Stadt konnte nicht geladen werden', 'La ville n’a pas pu être chargée', 'Impossibile caricare la città'],
+  'error.loadText': ['Check your internet connection and try again. Your saved games are safe.', 'Prüfe deine Internetverbindung und versuche es erneut. Deine Spielstände sind sicher.', 'Vérifiez votre connexion internet et réessayez. Vos sauvegardes sont intactes.', 'Controlla la connessione a internet e riprova. I tuoi salvataggi sono al sicuro.'],
+  'error.retry': ['Try again', 'Erneut versuchen', 'Réessayer', 'Riprova'],
+  'error.menu': ['Back to menu', 'Zurück zum Menü', 'Retour au menu', 'Torna al menu'],
+  'error.gpuTitle': ['The graphics stopped', 'Die Grafik wurde angehalten', 'Les graphismes se sont arrêtés', 'La grafica si è fermata'],
+  'error.gpuText': ['Your device reset the 3D graphics, often because memory ran low. Your game has been saved. Reload to continue, and try a lower graphics quality in Settings if it happens again.', 'Dein Gerät hat die 3D-Grafik zurückgesetzt, meist wegen knappem Speicher. Dein Spiel ist gespeichert. Lade neu, um weiterzuspielen, und wähle bei Bedarf eine niedrigere Grafikqualität.', 'Votre appareil a réinitialisé les graphismes 3D, souvent par manque de mémoire. Votre partie est sauvegardée. Rechargez pour continuer et choisissez une qualité graphique plus basse si cela se reproduit.', 'Il dispositivo ha reimpostato la grafica 3D, spesso per poca memoria. La partita è salvata. Ricarica per continuare e scegli una qualità grafica più bassa se succede ancora.'],
+  'error.reload': ['Reload', 'Neu laden', 'Recharger', 'Ricarica'],
+  'error.runtime': ['Something went wrong. Your game is saved; reload the page if anything looks off.', 'Etwas ist schiefgelaufen. Dein Spiel ist gespeichert; lade die Seite neu, falls etwas komisch aussieht.', 'Un problème est survenu. Votre partie est sauvegardée ; rechargez la page si quelque chose semble anormal.', 'Qualcosa è andato storto. La partita è salvata; ricarica la pagina se qualcosa non va.'],
+  'error.storage': ['This browser does not allow saving, for example in private mode. You can play, but your progress will be lost when you close the page.', 'Dieser Browser erlaubt kein Speichern, etwa im privaten Modus. Du kannst spielen, aber dein Fortschritt geht beim Schliessen verloren.', 'Ce navigateur n’autorise pas la sauvegarde, par exemple en navigation privée. Vous pouvez jouer, mais votre progression sera perdue à la fermeture.', 'Questo browser non consente di salvare, per esempio in modalità privata. Puoi giocare, ma i progressi andranno persi alla chiusura.'],
+  'record.kicker': ['Season record', 'Saisonbilanz', 'Bilan de saison', 'Bilancio di stagione'],
+  'record.anonymous': ['Swiss Blocks player', 'Swiss-Blocks-Spieler', 'Joueur de Swiss Blocks', 'Giocatore di Swiss Blocks'],
+  'record.summary': ['{title} · {profile} · {months} months', '{title} · {profile} · {months} Monate', '{title} · {profile} · {months} mois', '{title} · {profile} · {months} mesi'],
+  'record.code': ['Record {code}', 'Bilanz {code}', 'Bilan {code}', 'Bilancio {code}'],
+  'record.share': ['I finished a season of Swiss Blocks as {title} with {aum} in property and an execution score of {exec}/100. Can you beat it? {url}', 'Ich habe eine Saison Swiss Blocks als {title} abgeschlossen, mit {aum} Immobilienwert und {exec}/100 Execution. Schaffst du mehr? {url}', 'J’ai terminé une saison de Swiss Blocks comme {title}, avec {aum} d’immobilier et un score d’exécution de {exec}/100. Ferez-vous mieux ? {url}', 'Ho chiuso una stagione di Swiss Blocks come {title}, con {aum} di immobili e un punteggio di esecuzione di {exec}/100. Riesci a fare meglio? {url}'],
+  'record.title': ['Your season record', 'Deine Saisonbilanz', 'Votre bilan de saison', 'Il tuo bilancio di stagione'],
+  'record.lead': ['Add your name and share the result as an image, for example on LinkedIn.', 'Füge deinen Namen hinzu und teile das Ergebnis als Bild, zum Beispiel auf LinkedIn.', 'Ajoutez votre nom et partagez le résultat en image, par exemple sur LinkedIn.', 'Aggiungi il tuo nome e condividi il risultato come immagine, per esempio su LinkedIn.'],
+  'record.name': ['Name on the record', 'Name auf der Bilanz', 'Nom sur le bilan', 'Nome sul bilancio'],
+  'record.alt': ['Image of your season record', 'Bild deiner Saisonbilanz', 'Image de votre bilan de saison', 'Immagine del tuo bilancio di stagione'],
+  'record.download': ['Download image', 'Bild herunterladen', 'Télécharger l’image', 'Scarica l’immagine'],
+  'record.shareButton': ['Share', 'Teilen', 'Partager', 'Condividi'],
+  'record.copy': ['Copy text', 'Text kopieren', 'Copier le texte', 'Copia il testo'],
+  'record.copied': ['Copied', 'Kopiert', 'Copié', 'Copiato'],
+  'record.linkedin': ['Post on LinkedIn', 'Auf LinkedIn posten', 'Publier sur LinkedIn', 'Pubblica su LinkedIn'],
+  'record.note': ['Records are created on your device. Verified certificates will come with online seasons.', 'Bilanzen werden auf deinem Gerät erstellt. Verifizierte Zertifikate kommen mit den Online-Saisons.', 'Les bilans sont créés sur votre appareil. Les certificats vérifiés arriveront avec les saisons en ligne.', 'I bilanci sono creati sul tuo dispositivo. I certificati verificati arriveranno con le stagioni online.'],
 };
 
 const MONTHS = {
@@ -701,7 +738,10 @@ export const has = (key) => key in D;
 
 export function applyStatic(root) {
   for (const el of root.querySelectorAll('[data-i18n]')) el.textContent = t(el.dataset.i18n);
-  for (const el of root.querySelectorAll('[data-i18n-title]')) el.title = t(el.dataset.i18nTitle);
+  for (const el of root.querySelectorAll('[data-i18n-title]')) {
+    el.title = t(el.dataset.i18nTitle);
+    if (!el.textContent.trim()) el.setAttribute('aria-label', el.title);
+  }
   for (const el of root.querySelectorAll('[data-i18n-aria]')) el.setAttribute('aria-label', t(el.dataset.i18nAria));
 }
 

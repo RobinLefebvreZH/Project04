@@ -108,7 +108,7 @@ export function createTutorial({ hud, economy, onFinish }) {
     clearInterval(timer);
     root.hidden = true;
     index = -1;
-    onFinish?.();
+    onFinish?.(completed);
     if (completed) hud.setSpeed(1);
   }
 

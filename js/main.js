@@ -17,6 +17,8 @@ import { heroFigure } from './figures.js';
 import { settings, setSetting, onSettingsChange, QUALITY, MONTH_SECONDS } from './settings.js';
 import { t, cityName, applyStatic } from './i18n.js';
 import { closeModal } from './modal.js';
+import { play } from './sound.js';
+import { track, pageview } from './analytics.js';
 import { LANDMARKS } from '../wiki/landmarks.js';
 
 const homeEl = document.getElementById('home');
@@ -47,6 +49,7 @@ function animateExtension(s, b) {
 }
 
 function showIncome(s, list) {
+  if (list.length) play('coin');
   list.sort((a, b) => b[1] - a[1]).slice(0, INCOME_FLOATERS).forEach(([b, amount], i) => {
     setTimeout(() => session === s && s.fx.float(b, `+${chf(amount)}`, 'income'), i * 40);
   });
@@ -64,8 +67,12 @@ const economy = createEconomy((type, payload) => {
   else if (type === 'season') hud.showSeason(payload);
   else if (type === 'change') hud.refresh(payload);
   else if (type === 'income') showIncome(s, payload);
-  else if (type === 'goal') hud.celebrate(payload);
-  else if (type === 'pulse') {
+  else if (type === 'goal') {
+    play('goal');
+    hud.celebrate(payload);
+    if (payload.k === 'mission.first') track('First Purchase', { city: s.key });
+  } else if (type === 'pulse') {
+    play(payload.k === 'fx.acquired' ? 'buy' : 'goal');
     s.fx.pulse(payload.b);
     s.fx.float(payload.b, t(payload.k), 'event');
   }
@@ -81,6 +88,55 @@ const rivals = createRivals(economy, host);
 economy.use(goals);
 economy.use(createCards(economy, host));
 economy.use(rivals);
+
+const fatalEl = document.getElementById('fatal');
+
+function showFatal(titleKey, textKey, buttons) {
+  document.getElementById('fatalTitle').textContent = t(titleKey);
+  document.getElementById('fatalText').textContent = t(textKey);
+  const box = document.getElementById('fatalButtons');
+  box.innerHTML = '';
+  for (const [key, action, primary] of buttons) {
+    const btn = document.createElement('button');
+    btn.textContent = t(key);
+    if (primary) btn.className = 'primary';
+    btn.addEventListener('click', () => {
+      fatalEl.hidden = true;
+      action();
+    });
+    box.appendChild(btn);
+  }
+  fatalEl.hidden = false;
+  play('error');
+  box.querySelector('button')?.focus();
+}
+
+function browserSupport() {
+  const canvas = document.createElement('canvas');
+  const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+  if (!gl) return 'error.webgl';
+  if (typeof DecompressionStream === 'undefined') return 'error.browser';
+  return null;
+}
+
+function storageWorks() {
+  try {
+    localStorage.setItem('swissblocks.probe', '1');
+    localStorage.removeItem('swissblocks.probe');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+let errorShown = 0;
+function reportError() {
+  if (!session || Date.now() - errorShown < 30000) return;
+  errorShown = Date.now();
+  session.hud.toast({ k: 'error.runtime', p: {}, tone: 'neg' });
+}
+addEventListener('error', reportError);
+addEventListener('unhandledrejection', reportError);
 
 function progress(fraction, text) {
   loadBar.style.width = `${Math.round(fraction * 100)}%`;
@@ -122,9 +178,12 @@ function showHome() {
   homeEl.hidden = false;
   document.title = t('app.title');
   if (home) return;
+  pageview('');
   home = renderHome(homeEl, {
+    storageOk: storageWorks(),
     onNew(slot, profile, options, city) {
       economy.start(slot, profile, options, city);
+      track('Game Started', { profile, city, rivals: options.rivals ? 'on' : 'off' });
       enter(city);
     },
     onLoad(slot) {
@@ -165,7 +224,12 @@ async function startGame(key) {
   try {
     world = await loadWorld(key, LANDMARKS, (f) => progress(f));
   } catch {
-    progress(0, t('load.error', { city: cityName(key) }));
+    if (token !== routeToken) return;
+    loadingEl.hidden = true;
+    showFatal('error.loadTitle', 'error.loadText', [
+      ['error.retry', () => startGame(key), true],
+      ['error.menu', () => { location.hash = ''; }],
+    ]);
     return;
   }
   if (token !== routeToken) return;
@@ -174,6 +238,13 @@ async function startGame(key) {
   const extended = economy.attachWorld(world);
   const canvas = document.createElement('canvas');
   canvas.className = 'view';
+  canvas.setAttribute('role', 'img');
+  canvas.setAttribute('aria-label', t('a11y.map', { city: cityName(key) }));
+  canvas.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault();
+    economy.save();
+    showFatal('error.gpuTitle', 'error.gpuText', [['error.reload', () => location.reload(), true]]);
+  });
   document.getElementById('stage').appendChild(canvas);
   const scene = await createScene(canvas, world, (f) => progress(0.45 + f * 0.45), QUALITY[settings().quality]);
   if (token !== routeToken) {
@@ -204,7 +275,14 @@ async function startGame(key) {
     },
     onTutorial: () => session?.tutorial.start(),
   });
-  const tutorial = createTutorial({ hud, economy, onFinish: () => setSetting('tutorialDone', true) });
+  const tutorial = createTutorial({
+    hud,
+    economy,
+    onFinish: (completed) => {
+      setSetting('tutorialDone', true);
+      track(completed ? 'Tutorial Completed' : 'Tutorial Skipped');
+    },
+  });
   hooks.pick = (b) => hud.select(b);
   hooks.fly = (on) => hud.onFlyChange(on);
 
@@ -219,6 +297,8 @@ async function startGame(key) {
   hud.applySettings(settings());
 
   session = { key, world, scene, controls, overlay, hud, fx, tutorial, canvas, frame: 0 };
+  pageview(`play/${key}`);
+  track('City Opened', { city: key });
   document.title = `${cityName(key)} · ${t('app.title')}`;
   progress(1);
   loadingEl.hidden = true;
@@ -269,6 +349,12 @@ function run(s) {
 }
 
 function route() {
+  const unsupported = browserSupport();
+  if (unsupported) {
+    homeEl.hidden = true;
+    showFatal('error.browserTitle', unsupported, []);
+    return;
+  }
   const key = decodeURIComponent(location.hash.slice(1));
   if (CITIES[key] && !economy.state && !economy.load(activeSlot())) {
     location.hash = '';

@@ -34,6 +34,9 @@ export const LANDMARKS = {
      "license": "Public domain",
      "page": "https://commons.wikimedia.org/wiki/File:Grossmunster_Portal_Medieval_Column_Grotesque_Capital.jpg"
     }
+   ],
+   "bids": [
+    303
    ]
   },
   "fraumuenster": {
@@ -70,6 +73,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 3.0",
      "page": "https://commons.wikimedia.org/wiki/File:Fraum%C3%BCnster_-_Kreuzgang_-_Bodmer-Freso_Felix-Regula-Exuperantius_2011-06-15_13-01-32.jpg"
     }
+   ],
+   "bids": [
+    190
    ]
   },
   "stpeter": {
@@ -106,6 +112,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 3.0",
      "page": "https://commons.wikimedia.org/wiki/File:Ansicht_vom_Lindenhof_auf_das_Ziffernblatt_der_Kirche_St._Peter_in_Z%C3%BCrich_2011-08-01.jpg"
     }
+   ],
+   "bids": [
+    835
    ]
   },
   "eth": {
@@ -142,6 +151,9 @@ export const LANDMARKS = {
      "license": "CC0",
      "page": "https://commons.wikimedia.org/wiki/File:Hauptgeb%C3%A4ude_der_ETH_Z%C3%BCrich_and_Polyterrasse_2022-09-24_01.jpg"
     }
+   ],
+   "bids": [
+    42
    ]
   },
   "uzh": {
@@ -178,6 +190,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 3.0",
      "page": "https://commons.wikimedia.org/wiki/File:Z%C3%BCrich_Switzerland-University-of-Zurich-Main-Building-02.jpg"
     }
+   ],
+   "bids": [
+    760
    ]
   },
   "hb": {
@@ -208,6 +223,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 3.0",
      "page": "https://commons.wikimedia.org/wiki/File:Zuerich_Hauptbahnhof-2.jpg"
     }
+   ],
+   "bids": [
+    172
    ]
   },
   "landesmuseum": {
@@ -238,6 +256,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 4.0",
      "page": "https://commons.wikimedia.org/wiki/File:2026-04-26_-_Landesmuseum_Z%C3%BCrich_Schweiz.jpg"
     }
+   ],
+   "bids": [
+    57
    ]
   }
  },
@@ -276,6 +297,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 3.0",
      "page": "https://commons.wikimedia.org/wiki/File:Calvin%27s_Chair.JPG"
     }
+   ],
+   "bids": [
+    2334
    ]
   },
   "hoteldeville": {
@@ -303,6 +327,11 @@ export const LANDMARKS = {
      "license": "CC BY-SA 2.0",
      "page": "https://commons.wikimedia.org/wiki/File:Hotel_de_Ville_Geneva.jpg"
     }
+   ],
+   "bids": [
+    2367,
+    2339,
+    2348
    ]
   },
   "unige": {
@@ -339,6 +368,10 @@ export const LANDMARKS = {
      "license": "Public domain",
      "page": "https://commons.wikimedia.org/wiki/File:3UNIGE.jpg"
     }
+   ],
+   "bids": [
+    1917,
+    1912
    ]
   },
   "cornavin": {
@@ -375,6 +408,10 @@ export const LANDMARKS = {
      "license": "CC BY-SA 4.0",
      "page": "https://commons.wikimedia.org/wiki/File:2014-GareCornavin-NouveauHall3.jpg"
     }
+   ],
+   "bids": [
+    3681,
+    3731
    ]
   },
   "mah": {
@@ -405,12 +442,15 @@ export const LANDMARKS = {
      "license": "CC BY-SA 3.0",
      "page": "https://commons.wikimedia.org/wiki/File:32_Mus%C3%A9e_d%27Art_et_d%27Histoire.JPG"
     }
+   ],
+   "bids": [
+    2162
    ]
   }
  },
  "lausanne": {
   "cathedrale": {
-   "bid": 3280,
+   "bid": 3261,
    "kind": "monument",
    "name": {
     "en": "Lausanne Cathedral",
@@ -443,6 +483,20 @@ export const LANDMARKS = {
      "license": "CC BY-SA 3.0",
      "page": "https://commons.wikimedia.org/wiki/File:Cath%C3%A9drale,_Lausanne.jpg"
     }
+   ],
+   "bids": [
+    3261,
+    3280,
+    3245,
+    3251,
+    3250,
+    3249,
+    3252,
+    3277,
+    3279,
+    3241,
+    3246,
+    3276
    ]
   },
   "stmaire": {
@@ -473,6 +527,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 4.0",
      "page": "https://commons.wikimedia.org/wiki/File:Ch%C3%A2teau_Saint-Maire_Lausanne_2020.jpg"
     }
+   ],
+   "bids": [
+    3588
    ]
   },
   "rumine": {
@@ -508,6 +565,9 @@ export const LANDMARKS = {
      "license": "Public domain",
      "page": "https://commons.wikimedia.org/wiki/File:Grand_escalier_du_Palais_de_Rumine.jpg"
     }
+   ],
+   "bids": [
+    3521
    ]
   },
   "gare": {
@@ -544,6 +604,10 @@ export const LANDMARKS = {
      "license": "CC BY-SA 3.0",
      "page": "https://commons.wikimedia.org/wiki/File:Bahnhof_Lausanne.JPG"
     }
+   ],
+   "bids": [
+    4922,
+    4921
    ]
   },
   "hoteldeville": {
@@ -578,12 +642,15 @@ export const LANDMARKS = {
      "license": "CC BY-SA 4.0",
      "page": "https://commons.wikimedia.org/wiki/File:Beffroi_h%C3%B4tel_de_ville_Lausanne_Palud.jpg"
     }
+   ],
+   "bids": [
+    3215
    ]
   }
  },
  "zug": {
   "zytturm": {
-   "bid": 1414,
+   "bid": 1349,
    "kind": "monument",
    "name": {
     "en": "Zytturm",
@@ -615,6 +682,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 4.0",
      "page": "https://commons.wikimedia.org/wiki/File:Czech-2013-Prague-Astronomical_clock_face.jpg"
     }
+   ],
+   "bids": [
+    1349
    ]
   },
   "oswald": {
@@ -648,6 +718,9 @@ export const LANDMARKS = {
      "license": "Public domain",
      "page": "https://commons.wikimedia.org/wiki/File:Buetler1.jpg"
     }
+   ],
+   "bids": [
+    1257
    ]
   },
   "burg": {
@@ -677,6 +750,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 3.0",
      "page": "https://commons.wikimedia.org/wiki/File:BurgZug.JPG"
     }
+   ],
+   "bids": [
+    1220
    ]
   },
   "bahnhof": {
@@ -707,6 +783,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 3.0",
      "page": "https://commons.wikimedia.org/wiki/File:Bahnhof_Zug.jpg"
     }
+   ],
+   "bids": [
+    2406
    ]
   }
  },
@@ -745,6 +824,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 3.0",
      "page": "https://commons.wikimedia.org/wiki/File:Kapellbruecke_Tafel_71.jpg"
     }
+   ],
+   "bids": [
+    2440
    ]
   },
   "jesuiten": {
@@ -775,6 +857,9 @@ export const LANDMARKS = {
      "license": "FAL",
      "page": "https://commons.wikimedia.org/wiki/File:Luzern_asv2022-10_Jesuitenkirche_img1.jpg"
     }
+   ],
+   "bids": [
+    2203
    ]
   },
   "hofkirche": {
@@ -811,6 +896,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 2.5",
      "page": "https://commons.wikimedia.org/wiki/File:6291_-_Luzern_-_Hofkirche_St._Leodegar.JPG"
     }
+   ],
+   "bids": [
+    2704
    ]
   },
   "bahnhof": {
@@ -847,6 +935,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 3.0",
      "page": "https://commons.wikimedia.org/wiki/File:Bahnhof_Luzern_Ammann_Baumann_01.JPG"
     }
+   ],
+   "bids": [
+    2445
    ]
   },
   "unilu": {
@@ -877,6 +968,9 @@ export const LANDMARKS = {
      "license": "FAL",
      "page": "https://commons.wikimedia.org/wiki/File:Luzern_asv2022-10_Universit%C3%A4t_und_PH.jpg"
     }
+   ],
+   "bids": [
+    1225
    ]
   }
  },
@@ -915,6 +1009,10 @@ export const LANDMARKS = {
      "license": "FAL",
      "page": "https://commons.wikimedia.org/wiki/File:11-11-24-basel-by-ralfr-044.jpg"
     }
+   ],
+   "bids": [
+    5911,
+    5904
    ]
   },
   "rathaus": {
@@ -951,6 +1049,9 @@ export const LANDMARKS = {
      "license": "FAL",
      "page": "https://commons.wikimedia.org/wiki/File:11-11-24-basel-by-ralfr-125.jpg"
     }
+   ],
+   "bids": [
+    4027
    ]
   },
   "unibas": {
@@ -987,6 +1088,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 3.0",
      "page": "https://commons.wikimedia.org/wiki/File:Basel_Bernoullianum_08-06-2008.jpg"
     }
+   ],
+   "bids": [
+    3958
    ]
   },
   "sbb": {
@@ -1023,6 +1127,9 @@ export const LANDMARKS = {
      "license": "FAL",
      "page": "https://commons.wikimedia.org/wiki/File:11-11-24-basel-by-ralfr-283.jpg"
     }
+   ],
+   "bids": [
+    500
    ]
   },
   "spalentor": {
@@ -1052,6 +1159,9 @@ export const LANDMARKS = {
      "license": "FAL",
      "page": "https://commons.wikimedia.org/wiki/File:Basel_-_Spalentor.jpg"
     }
+   ],
+   "bids": [
+    3933
    ]
   }
  },
@@ -1090,6 +1200,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 4.0",
      "page": "https://commons.wikimedia.org/wiki/File:Czech-2013-Prague-Astronomical_clock_face.jpg"
     }
+   ],
+   "bids": [
+    5798
    ]
   },
   "muenster": {
@@ -1126,6 +1239,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 3.0",
      "page": "https://commons.wikimedia.org/wiki/File:Bern_-_Muenster_(Mittelschiff_in_Richtung_Chor).jpg"
     }
+   ],
+   "bids": [
+    5574
    ]
   },
   "bundeshaus": {
@@ -1162,6 +1278,9 @@ export const LANDMARKS = {
      "license": "Public domain",
      "page": "https://commons.wikimedia.org/wiki/File:Altes_Inselspital_1742.jpg"
     }
+   ],
+   "bids": [
+    1357
    ]
   },
   "bahnhof": {
@@ -1198,6 +1317,9 @@ export const LANDMARKS = {
      "license": "CC BY 4.0",
      "page": "https://commons.wikimedia.org/wiki/File:Bahnhof_Bern_Perronhalle.jpg"
     }
+   ],
+   "bids": [
+    2489
    ]
   },
   "unibe": {
@@ -1234,6 +1356,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 3.0",
      "page": "https://commons.wikimedia.org/wiki/File:Universit%C3%A4t_Bern_Hauptgeb%C3%A4ude_DSC05761.jpg"
     }
+   ],
+   "bids": [
+    2534
    ]
   },
   "kaefigturm": {
@@ -1269,12 +1394,15 @@ export const LANDMARKS = {
      "license": "CC BY-SA 3.0",
      "page": "https://commons.wikimedia.org/wiki/File:Anna-Seiler-Brunnen_Kaefigturm_Bern.jpg"
     }
+   ],
+   "bids": [
+    1366
    ]
   }
  },
  "stgallen": {
   "kathedrale": {
-   "bid": 1749,
+   "bid": 3048,
    "kind": "monument",
    "name": {
     "en": "Abbey of Saint Gall",
@@ -1301,6 +1429,10 @@ export const LANDMARKS = {
      "license": "FAL",
      "page": "https://commons.wikimedia.org/wiki/File:StGallen_asv2022-10_F%C3%BCrstabtei_img1.jpg"
     }
+   ],
+   "bids": [
+    3048,
+    1763
    ]
   },
   "stiftsbibliothek": {
@@ -1331,6 +1463,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 3.0",
      "page": "https://commons.wikimedia.org/wiki/File:BibliothekSG.jpg"
     }
+   ],
+   "bids": [
+    3010
    ]
   },
   "hsg": {
@@ -1367,6 +1502,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 4.0",
      "page": "https://commons.wikimedia.org/wiki/File:Luftaufnahmen_September_1996_HSG-Campus_von_Norden_mit_Blick_auf_die_Stadt_HSGH_022-001319.jpg"
     }
+   ],
+   "bids": [
+    3856
    ]
   },
   "bahnhof": {
@@ -1397,6 +1535,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 4.0",
      "page": "https://commons.wikimedia.org/wiki/File:Bahnhof,_St._Gallen_(1Y7A2279).jpg"
     }
+   ],
+   "bids": [
+    2985
    ]
   },
   "laurenzen": {
@@ -1424,6 +1565,9 @@ export const LANDMARKS = {
      "license": "FAL",
      "page": "https://commons.wikimedia.org/wiki/File:StGallen_asv2022-10_Kirche_StLaurenzen_img6.jpg"
     }
+   ],
+   "bids": [
+    1976
    ]
   }
  },
@@ -1456,6 +1600,9 @@ export const LANDMARKS = {
      "license": "Public domain",
      "page": "https://commons.wikimedia.org/wiki/File:Lugano_San_Lorenzo_02.JPG"
     }
+   ],
+   "bids": [
+    1711
    ]
   },
   "palazzo": {
@@ -1490,6 +1637,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 4.0",
      "page": "https://commons.wikimedia.org/wiki/File:Cortile_interno_del_Palazzo_Civico_di_Lugano_(2026).jpg"
     }
+   ],
+   "bids": [
+    897
    ]
   },
   "stazione": {
@@ -1520,6 +1670,9 @@ export const LANDMARKS = {
      "license": "CC BY-SA 4.0",
      "page": "https://commons.wikimedia.org/wiki/File:Bahnhof_Lugano_2017.jpg"
     }
+   ],
+   "bids": [
+    1667
    ]
   },
   "usi": {
@@ -1543,7 +1696,10 @@ export const LANDMARKS = {
     "fr": "Université de la Suisse italienne",
     "it": "Università della Svizzera italiana"
    },
-   "imgs": []
+   "imgs": [],
+   "bids": [
+    3839
+   ]
   },
   "angioli": {
    "bid": 789,
@@ -1571,6 +1727,9 @@ export const LANDMARKS = {
      "license": "CC0",
      "page": "https://commons.wikimedia.org/wiki/File:Kirche_Santa_Maria_degli_Angioli.jpg"
     }
+   ],
+   "bids": [
+    789
    ]
   }
  }
