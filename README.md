@@ -49,13 +49,15 @@ js/mesh.js          chunk meshing
 js/scene.js         renderer, shader, level of detail
 js/camera.js        orbit and flight controls, picking
 js/overlay.js       labels and minimap
-js/economy.js       game rules, defects, events, scoring
+js/economy.js       game rules, defects, events, scoring, save slots
+js/tutorial.js      guided first game
 js/goals.js         missions, collections, titles
 js/cards.js         decision cards and delayed outcomes
 js/rivals.js        rival investors, auctions, rumours
 js/fx.js            floating numbers and building pulses
 js/figures.js       SVG figures
-data/*.js           compressed city grids
+data/*.grid.bin     city grids: building ids, roof heights, ground heights (stored as row deltas), land cover and quarters, gzip
+data/*.meta.bin     building attributes, addresses, quarters, names and trees as gzip JSON
 wiki/landmarks.js   landmark texts, links and photo credits
 wiki/img/           landmark photos from Wikimedia Commons
 ```

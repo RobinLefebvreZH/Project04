@@ -17,22 +17,61 @@ const TRADABLE = {
 
 const CHURCH_NAME = /Kirche|münster|Münster|Kapelle|Predigern|Cathédrale|Cattedrale|Kathedrale|Temple|Église|Chiesa/;
 
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    const el = document.createElement('script');
-    el.src = src;
-    el.onload = resolve;
-    el.onerror = () => reject(new Error(`Could not load ${src}`));
-    document.head.appendChild(el);
-  });
+const downloads = new Map();
+
+async function download(url, onProgress) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Could not load ${url}`);
+  const total = +res.headers.get('content-length') || 0;
+  if (!total || !res.body) return new Uint8Array(await res.arrayBuffer());
+  const out = new Uint8Array(total);
+  const reader = res.body.getReader();
+  let received = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    out.set(value, received);
+    received += value.length;
+    onProgress(received / total);
+  }
+  return out;
 }
 
-async function gunzip(b64) {
-  const bin = atob(b64);
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+async function gunzip(bytes) {
   const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
   return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+function fetchCity(key, onProgress = () => {}) {
+  if (!downloads.has(key)) {
+    const parts = [0, 0];
+    const report = (i) => (f) => {
+      parts[i] = f;
+      downloads.get(key).progress?.(parts[0] * 0.9 + parts[1] * 0.1);
+    };
+    const entry = {
+      progress: onProgress,
+      promise: Promise.all([download(`data/${key}.grid.bin`, report(0)), download(`data/${key}.meta.bin`, report(1))]),
+    };
+    entry.promise.catch(() => downloads.delete(key));
+    downloads.set(key, entry);
+  }
+  const entry = downloads.get(key);
+  entry.progress = onProgress;
+  return entry.promise;
+}
+
+export function prefetchCity(key) {
+  if (CITIES[key]) fetchCity(key).catch(() => null);
+}
+
+function restoreGround(grid, W, H) {
+  const N = W * H;
+  const ground = new Uint16Array(N);
+  const lo = N * 4, hi = N * 5;
+  for (let x = 0; x < W; x++) ground[x] = grid[lo + x] | (grid[hi + x] << 8);
+  for (let i = W; i < N; i++) ground[i] = (ground[i - W] + (grid[lo + i] | (grid[hi + i] << 8))) & 0xffff;
+  return ground;
 }
 
 export function hash2(x, y) {
@@ -41,25 +80,11 @@ export function hash2(x, y) {
   return ((h ^ (h >>> 16)) >>> 0) / 4294967295;
 }
 
-let loading = Promise.resolve();
-
-function loadCityData(key) {
-  const next = loading.then(async () => {
-    await loadScript(`data/${key}.js`);
-    const raw = window.SB_CITY;
-    delete window.SB_CITY;
-    return raw;
-  });
-  loading = next.catch(() => null);
-  return next;
-}
-
 export async function loadWorld(key, landmarks, onProgress = () => {}) {
-  const raw = await loadCityData(key);
-  onProgress(0.15);
-  const grid = await gunzip(raw.grid);
-  const meta = JSON.parse(new TextDecoder().decode(await gunzip(raw.meta)));
-  onProgress(0.3);
+  const [gridBytes, metaBytes] = await fetchCity(key, (f) => onProgress(f * 0.3));
+  const grid = await gunzip(gridBytes);
+  const meta = JSON.parse(new TextDecoder().decode(await gunzip(metaBytes)));
+  onProgress(0.34);
 
   const W = meta.W, H = meta.H, N = W * H;
   const base = meta.base ?? 380;
@@ -69,7 +94,7 @@ export async function loadWorld(key, landmarks, onProgress = () => {}) {
     city: CITIES[key],
     id: new Uint16Array(grid.buffer.slice(0, N * 2)),
     roof: new Uint16Array(grid.buffer.slice(N * 2, N * 4)),
-    ground: new Uint16Array(grid.buffer.slice(N * 4, N * 6)),
+    ground: restoreGround(grid, W, H),
     cover: grid.slice(N * 6, N * 7),
     quarterGrid: grid.slice(N * 7, N * 8),
     arts: meta.art,
@@ -77,7 +102,7 @@ export async function loadWorld(key, landmarks, onProgress = () => {}) {
     addresses: meta.addr,
     quarters: meta.Q,
     poi: meta.names,
-    trees: raw.trees || [],
+    trees: meta.trees || [],
     count: meta.M.length,
   };
   const nb = world.count;

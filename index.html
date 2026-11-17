@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Swiss Blocks</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -38,13 +38,15 @@
     <button id="bHome" class="icon" data-i18n-title="top.home"><svg><use href="#i-home"/></svg></button>
     <div class="brand" data-i18n="app.title"></div>
     <select id="citySelect" data-i18n-aria="top.city"></select>
-    <div class="stat"><span data-i18n="top.title"></span><b id="sTitle"></b></div>
-    <div class="stat"><span data-i18n="top.date"></span><b id="sDate"></b></div>
-    <div class="stat"><span data-i18n="top.cash"></span><b id="sCash"></b></div>
-    <div class="stat"><span data-i18n="top.debt"></span><b id="sDebt"></b></div>
-    <div class="stat"><span data-i18n="top.net"></span><b id="sNet"></b></div>
-    <div class="stat"><span data-i18n="top.flow"></span><b id="sFlow"></b></div>
-    <div class="stat"><span data-i18n="top.rate"></span><b id="sRate"></b></div>
+    <div class="stats">
+      <div class="stat"><span data-i18n="top.title"></span><b id="sTitle"></b></div>
+      <div class="stat"><span data-i18n="top.date"></span><b id="sDate"></b></div>
+      <div class="stat"><span data-i18n="top.cash"></span><b id="sCash"></b></div>
+      <div class="stat"><span data-i18n="top.debt"></span><b id="sDebt"></b></div>
+      <div class="stat"><span data-i18n="top.net"></span><b id="sNet"></b></div>
+      <div class="stat"><span data-i18n="top.flow"></span><b id="sFlow"></b></div>
+      <div class="stat"><span data-i18n="top.rate"></span><b id="sRate"></b></div>
+    </div>
     <div class="spacer"></div>
     <div class="speed">
       <button id="bPause" class="icon" data-i18n-title="top.pause"><svg><use href="#i-pause"/></svg></button>
@@ -105,7 +107,9 @@
     </div>
   </div>
 
+  <button id="bPanel" class="panel-toggle" data-i18n="mobile.panel"></button>
   <div id="toasts" class="toasts"></div>
+  <div id="coach" class="coach" hidden><div class="coach-ring"></div><div class="coach-box panel"></div></div>
 </section>
 
 <div id="loading" class="loading" hidden>

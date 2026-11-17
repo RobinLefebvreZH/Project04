@@ -4,6 +4,7 @@ import { integer, percent, chf, escapeHtml as esc } from './format.js';
 import { PROFILE_FIGURES } from './figures.js';
 import { PROFILES, SEASON, getBoard, listSlots, latestSlot, deleteSlot } from './economy.js';
 import { settings, setSetting, OPTIONS } from './settings.js';
+import { prefetchCity } from './world.js';
 
 const STEPS = ['home.how1', 'home.how2', 'home.how3', 'home.how4'];
 
@@ -37,6 +38,7 @@ export function renderHome(root, { onNew, onLoad }) {
     menu() {
       const last = latestSlot();
       const canContinue = last && !last.ended;
+      if (canContinue) prefetchCity(last.city);
       const items = [
         canContinue ? `<button class="menu-item primary" data-go="continue"><span>${t('menu.continue')}</span><small>${esc(cityName(last.city))} · ${t('load.slot', { n: last.slot })} · ${t('score.monthOf', { t: last.t, total: SEASON })}</small></button>` : '',
         `<button class="menu-item ${canContinue ? '' : 'primary'}" data-view="new"><span>${t('menu.new')}</span></button>`,
@@ -49,6 +51,7 @@ export function renderHome(root, { onNew, onLoad }) {
     },
 
     new() {
+      prefetchCity(draft.city);
       const slots = listSlots();
       if (!draft.slot) draft.slot = (slots.find((s) => s.empty) || slots.slice().sort((a, b) => a.savedAt - b.savedAt)[0]).slot;
       const chosen = slots.find((s) => s.slot === draft.slot);
@@ -106,6 +109,7 @@ export function renderHome(root, { onNew, onLoad }) {
 
     how() {
       return `<ol class="steps">${STEPS.map((k) => `<li>${esc(t(k))}</li>`).join('')}</ol>
+        <p class="note">${esc(t('tut.howNote'))}</p>
         <h3>${t('home.controls')}</h3><p class="note">${esc(t('home.controlsText'))}</p>`;
     },
 

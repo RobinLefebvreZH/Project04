@@ -10,7 +10,7 @@ const $ = (id) => document.getElementById(id);
 const row = (label, value, cls = '') => `<div class="row"><span>${label}</span><span class="num ${cls}">${value}</span></div>`;
 const tone = (v) => (v >= 0 ? 'pos' : 'neg');
 
-export function createHud({ world, economy, scene, controls, overlay, goals, rivals, onHome, onCity }) {
+export function createHud({ world, economy, scene, controls, overlay, goals, rivals, onHome, onCity, onTutorial }) {
   const G = () => economy.state;
   let tab = 'portfolio';
   let boardSort = 'exec';
@@ -296,7 +296,7 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
       h += `<hr>${row(t('info.ask'), chf(ask))}
         ${row(t('info.maxMortgage'), `${chf(limit)} · ${maxLtv}%`, maxLtv < 80 ? 'neg' : '')}
         <div class="slider"><span>${t('info.mortgageSlider')}</span><input type="range" data-action="ltv" min="0" max="${maxLtv}" step="5" value="${ltv}"><span class="num" id="ltvValue">${ltv}%</span></div>
-        ${row(t('info.equity'), `<span id="equityNeed">${chf(ask * (1 - ltv / 100) + ask * 0.005)}</span>`)}
+        ${row(t('info.equity'), `<span id="equityNeed" class="${g.cash < ask * (1 - ltv / 100) + ask * 0.005 ? 'neg' : ''}">${chf(ask * (1 - ltv / 100) + ask * 0.005)}</span>`)}
         <div class="actions"><button class="primary" data-action="buy" ${g.ended ? 'disabled' : ''}>${t('act.buy')}</button></div>`;
     } else if (rival !== undefined) {
       h += `<hr><p class="note">${esc(t('info.rivalOwned', { rival: rivals.ownerName(rival) }))}</p>`;
@@ -306,7 +306,10 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
     el.innerHTML = h;
   }
 
+  const sheet = (open) => document.getElementById('sidebar').classList.toggle('open', open);
+
   function select(b) {
+    sheet(false);
     if (b !== selected) imageIndex = 0;
     selected = b;
     scene.select(b);
@@ -361,7 +364,9 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
     ltv = +e.target.value;
     $('ltvValue').textContent = `${ltv}%`;
     const ask = economy.askPrice(selected);
-    $('equityNeed').textContent = chf(ask * (1 - ltv / 100) + ask * 0.005);
+    const need = ask * (1 - ltv / 100) + ask * 0.005;
+    $('equityNeed').textContent = chf(need);
+    $('equityNeed').className = G().cash < need ? 'neg' : '';
   };
   for (const id of ['info', 'tabBody']) {
     listen($(id), 'click', onClick);
@@ -371,6 +376,11 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
   for (const btn of document.querySelectorAll('#tabs button')) {
     listen(btn, 'click', () => { tab = btn.dataset.tab; renderTab(); });
   }
+  listen($('bPanel'), 'click', () => {
+    const open = !$('sidebar').classList.contains('open');
+    if (open) select(-1);
+    sheet(open);
+  });
 
   const searchIndex = [];
   {
@@ -460,8 +470,12 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
     setSpeed(0);
     const items = ['home.how1', 'home.how2', 'home.how3', 'home.how4'].map((k) => `<li>${esc(t(k))}</li>`).join('');
     openModal(`<h1>${t('help.title')}</h1><ul>${items}</ul><h3>${t('home.controls')}</h3><p class="note">${esc(t('home.controlsText'))}</p>
-      <div class="buttons"><button class="primary" data-close>${t('help.resume')}</button><button class="danger" data-restart>${t('help.restart')}</button></div>`, (box) => {
+      <div class="buttons"><button class="primary" data-close>${t('help.resume')}</button><button data-tutorial>${t('tut.replay')}</button><button class="danger" data-restart>${t('help.restart')}</button></div>`, (box) => {
       box.querySelector('[data-close]').addEventListener('click', closeModal);
+      box.querySelector('[data-tutorial]').addEventListener('click', () => {
+        closeModal();
+        onTutorial();
+      });
       box.querySelector('[data-restart]').addEventListener('click', () => showProfiles());
     });
   }
@@ -587,6 +601,8 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
 
   return {
     get night() { return tools.night; },
+    get selected() { return selected; },
+    get tab() { return tab; },
     select,
     focus,
     toast,
@@ -622,6 +638,7 @@ export function createHud({ world, economy, scene, controls, overlay, goals, riv
       $('tabBody').innerHTML = '';
       $('toasts').innerHTML = '';
       for (const k in controls.pad) controls.pad[k] = false;
+      sheet(false);
     },
   };
 }

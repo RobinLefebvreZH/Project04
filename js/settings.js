@@ -13,7 +13,7 @@ export const QUALITY = {
 
 export const MONTH_SECONDS = { slow: 10, normal: 6, fast: 3 };
 
-const DEFAULTS = { quality: 'high', pace: 'normal', labels: true, minimap: true, backdrop: true };
+const DEFAULTS = { quality: 'high', pace: 'normal', labels: true, minimap: true, backdrop: true, tutorialDone: false };
 
 function read() {
   try {

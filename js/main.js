@@ -9,11 +9,12 @@ import { createGoals } from './goals.js';
 import { createCards } from './cards.js';
 import { createRivals } from './rivals.js';
 import { createFx } from './fx.js';
+import { createTutorial } from './tutorial.js';
 import { chf } from './format.js';
 import { renderHome } from './home.js';
 import { createBackdrop } from './backdrop.js';
 import { heroFigure } from './figures.js';
-import { settings, onSettingsChange, QUALITY, MONTH_SECONDS } from './settings.js';
+import { settings, setSetting, onSettingsChange, QUALITY, MONTH_SECONDS } from './settings.js';
 import { t, cityName, applyStatic } from './i18n.js';
 import { closeModal } from './modal.js';
 import { LANDMARKS } from '../wiki/landmarks.js';
@@ -91,6 +92,7 @@ function teardown() {
   cancelAnimationFrame(session.frame);
   economy.setSpeed(0);
   economy.save();
+  session.tutorial.dispose();
   session.hud.dispose();
   session.fx.dispose();
   session.overlay.dispose();
@@ -200,7 +202,9 @@ async function startGame(key) {
       pendingFocus = b ?? null;
       location.hash = c;
     },
+    onTutorial: () => session?.tutorial.start(),
   });
+  const tutorial = createTutorial({ hud, economy, onFinish: () => setSetting('tutorialDone', true) });
   hooks.pick = (b) => hud.select(b);
   hooks.fly = (on) => hud.onFlyChange(on);
 
@@ -214,13 +218,15 @@ async function startGame(key) {
   hud.start();
   hud.applySettings(settings());
 
-  session = { key, world, scene, controls, overlay, hud, fx, canvas, frame: 0 };
+  session = { key, world, scene, controls, overlay, hud, fx, tutorial, canvas, frame: 0 };
   document.title = `${cityName(key)} · ${t('app.title')}`;
   progress(1);
   loadingEl.hidden = true;
   gameEl.hidden = false;
 
-  if (economy.state.ended) {
+  if (!settings().tutorialDone && economy.state.t === 0 && !Object.keys(economy.state.owned).length) {
+    tutorial.start();
+  } else if (economy.state.ended) {
     hud.showProfiles();
   } else if (pendingFocus != null) {
     const b = pendingFocus;
