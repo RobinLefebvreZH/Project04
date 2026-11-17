@@ -3,6 +3,7 @@ import { t, cityName, dateLabel, onLanguageChange, LANGUAGES, getLanguage, setLa
 import { integer, percent, chf, escapeHtml as esc } from './format.js';
 import { PROFILE_FIGURES, logoSvg } from './figures.js';
 import { feedbackLink } from './feedback.js';
+import { SITE } from './config.js';
 import { play } from './sound.js';
 import { PROFILES, SEASON, getBoard, listSlots, latestSlot, deleteSlot } from './economy.js';
 import { settings, setSetting, OPTIONS } from './settings.js';
@@ -130,7 +131,7 @@ export function renderHome(root, { onNew, onLoad, storageOk = true }) {
 
     about() {
       return `<h3>${t('about.imprint')}</h3>
-        <p class="note">${esc(t('about.imprintText'))}<br>${t('about.contact')}: <a href="https://robin-lefebvre.com" target="_blank" rel="noopener">robin-lefebvre.com</a></p>
+        <p class="note">${esc(t('about.imprintText'))}<br>${t('about.contact')}: <a href="mailto:${SITE.contact}">${SITE.contact}</a> · <a href="${SITE.author}" target="_blank" rel="noopener">robin-lefebvre.com</a></p>
         <h3>${t('about.privacy')}</h3><p class="note">${esc(t('about.privacyText'))}</p>
         <h3>${t('about.licences')}</h3>
         <p class="note">${esc(t('about.licenceSwisstopo'))}</p>
